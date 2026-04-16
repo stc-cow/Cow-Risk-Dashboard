@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Hajj Telecom COW Risk Dashboard"
+version = "1.0.0"
+id = "artifacts/hajj-dashboard"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21597
+
+[services.development]
+run = "pnpm --filter @workspace/hajj-dashboard run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/hajj-dashboard", "run", "build" ]
+publicDir = "artifacts/hajj-dashboard/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21597"
+BASE_PATH = "/"

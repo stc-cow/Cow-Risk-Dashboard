@@ -1,0 +1,295 @@
+import { useState, useMemo } from "react";
+import { analyzeSite } from "../lib/calculations";
+import { ALL_SITES } from "../lib/siteData";
+import { MetricCard } from "../components/MetricCard";
+import { SiteMap } from "../components/SiteMap";
+import { SiteDetailPanel } from "../components/SiteDetailPanel";
+import { SiteTable } from "../components/SiteTable";
+import { TechnicianRecommendation } from "../components/TechnicianRecommendation";
+import { RiskDistributionPie, RiskTypeBreakdown, LocationRiskChart } from "../components/RiskCharts";
+
+type Tab = "overview" | "map" | "sites" | "technicians";
+
+export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
+
+  const analyses = useMemo(() => ALL_SITES.map(analyzeSite), []);
+
+  const safeCount = analyses.filter(a => a.overallRisk === "safe").length;
+  const warningCount = analyses.filter(a => a.overallRisk === "warning").length;
+  const criticalCount = analyses.filter(a => a.overallRisk === "critical").length;
+
+  const selectedAnalysis = selectedSiteId ? analyses.find(a => a.site.id === selectedSiteId) ?? null : null;
+
+  const handleSelectSite = (id: string) => {
+    setSelectedSiteId(prev => prev === id ? null : id);
+    if (activeTab !== "map" && activeTab !== "sites") setActiveTab("map");
+  };
+
+  const totalTechs =
+    Math.ceil(criticalCount / 3) + Math.ceil(warningCount / 6);
+
+  const tabs: Array<{ key: Tab; label: string; icon: string }> = [
+    { key: "overview", label: "Overview", icon: "📊" },
+    { key: "map", label: "Geographic Map", icon: "🗺️" },
+    { key: "sites", label: "Site List", icon: "📋" },
+    { key: "technicians", label: "Field Ops", icon: "👷" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="stc-gradient text-white shadow-lg">
+        <div className="max-w-screen-2xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col items-center">
+                <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="10" y="2" width="4" height="14" rx="1" fill="white"/>
+                    <rect x="6" y="6" width="12" height="2" rx="1" fill="white"/>
+                    <rect x="4" y="10" width="16" height="2" rx="1" fill="white"/>
+                    <rect x="8" y="16" width="8" height="6" rx="1" fill="white" opacity="0.7"/>
+                    <rect x="11" y="16" width="2" height="6" rx="0.5" fill="white"/>
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h1 className="text-lg font-bold tracking-tight">Hajj 1447 COW Risk Dashboard</h1>
+                <p className="text-green-200 text-xs">stc Nokia Infrastructure · 94 Sites · 46°C Operating Conditions</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1.5 text-sm">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                <span className="text-green-100 text-xs">Live Monitoring</span>
+              </div>
+              <div className="flex gap-2">
+                <div className="bg-red-500/30 border border-red-400/30 rounded-lg px-3 py-1.5 text-center">
+                  <div className="text-lg font-bold text-red-200">{criticalCount}</div>
+                  <div className="text-[10px] text-red-300 uppercase">Critical</div>
+                </div>
+                <div className="bg-amber-500/30 border border-amber-400/30 rounded-lg px-3 py-1.5 text-center">
+                  <div className="text-lg font-bold text-amber-200">{warningCount}</div>
+                  <div className="text-[10px] text-amber-300 uppercase">Warning</div>
+                </div>
+                <div className="bg-emerald-500/30 border border-emerald-400/30 rounded-lg px-3 py-1.5 text-center">
+                  <div className="text-lg font-bold text-emerald-200">{safeCount}</div>
+                  <div className="text-[10px] text-emerald-300 uppercase">Safe</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-1 mt-3">
+            {tabs.map(t => (
+              <button
+                key={t.key}
+                onClick={() => setActiveTab(t.key)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-t-lg transition-colors flex items-center gap-1.5 ${
+                  activeTab === t.key
+                    ? "bg-background text-foreground"
+                    : "text-green-200 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                <span>{t.icon}</span>
+                <span>{t.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 max-w-screen-2xl mx-auto w-full px-4 py-4">
+        {activeTab === "overview" && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+              <MetricCard title="Total COW Sites" value={analyses.length} icon="📡" color="blue" subtitle="Hajj 1447 deployment" />
+              <MetricCard title="Safe Sites" value={safeCount} icon="✓" color="green" subtitle={`${((safeCount/analyses.length)*100).toFixed(0)}% of fleet`} />
+              <MetricCard title="Warning Sites" value={warningCount} icon="⚠" color="yellow" subtitle="Requires monitoring" />
+              <MetricCard title="Critical Sites" value={criticalCount} icon="✗" color="red" subtitle="Immediate attention" />
+              <MetricCard title="Field Technicians" value={totalTechs} icon="👷" color="blue" subtitle="Recommended deployment" />
+              <MetricCard title="Operating Temp" value="46°C" icon="🌡" color="red" subtitle="Extreme Hajj conditions" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <RiskDistributionPie analyses={analyses} />
+              <RiskTypeBreakdown analyses={analyses} />
+              <LocationRiskChart analyses={analyses} />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+              <div className="lg:col-span-2">
+                <SiteTable analyses={analyses} selectedSiteId={selectedSiteId} onSelectSite={handleSelectSite} />
+              </div>
+              <TechnicianRecommendation analyses={analyses} />
+            </div>
+
+            <div className="bg-card border border-card-border rounded-xl p-4 text-xs space-y-3">
+              <div className="font-semibold text-sm flex items-center gap-2">
+                <span className="w-5 h-5 rounded bg-amber-100 text-amber-700 flex items-center justify-center">⚙</span>
+                Engineering Assumptions (46°C Extreme Conditions)
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                  <div className="font-semibold text-muted-foreground mb-1 uppercase tracking-wide text-[10px]">Generator</div>
+                  <div>Power Factor: 0.80</div>
+                  <div>Alt. Efficiency: 87%</div>
+                  <div>Risk Factor: 90%</div>
+                  <div>Degradation: 3%/yr</div>
+                </div>
+                <div>
+                  <div className="font-semibold text-muted-foreground mb-1 uppercase tracking-wide text-[10px]">Cooling</div>
+                  <div>Climate Factor: T3=46°C</div>
+                  <div>Derating: 0.833</div>
+                  <div>COP: 3.5</div>
+                  <div>Degradation: 1.5%/yr</div>
+                </div>
+                <div>
+                  <div className="font-semibold text-muted-foreground mb-1 uppercase tracking-wide text-[10px]">Battery</div>
+                  <div>Voltage: 50V DC</div>
+                  <div>Lead-Acid DoD: 50%</div>
+                  <div>Lithium DoD: 85%</div>
+                  <div>LA Discharge: 0.85C</div>
+                </div>
+                <div>
+                  <div className="font-semibold text-muted-foreground mb-1 uppercase tracking-wide text-[10px]">Scenarios</div>
+                  <div>9 operational scenarios</div>
+                  <div>Prime / Backup / Outage</div>
+                  <div>AC1 / AC1+AC2 / Off</div>
+                  <div>Charged / Charging / Discharge</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "map" && (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[calc(100vh-200px)]">
+            <div className="lg:col-span-3">
+              <SiteMap analyses={analyses} selectedSiteId={selectedSiteId} onSelectSite={handleSelectSite} />
+              <div className="mt-3 grid grid-cols-3 gap-3">
+                <RiskDistributionPie analyses={analyses} />
+                <LocationRiskChart analyses={analyses} />
+                <TechnicianRecommendation analyses={analyses} />
+              </div>
+            </div>
+            <div className="lg:col-span-1 flex flex-col gap-3">
+              {selectedAnalysis ? (
+                <div className="flex-1 overflow-auto">
+                  <SiteDetailPanel analysis={selectedAnalysis} onClose={() => setSelectedSiteId(null)} />
+                </div>
+              ) : (
+                <div className="bg-card border border-card-border rounded-xl p-4 text-center text-sm text-muted-foreground flex-1 flex flex-col items-center justify-center gap-2">
+                  <div className="text-4xl opacity-30">📍</div>
+                  <p>Click a site marker on the map to view detailed risk analysis</p>
+                  <p className="text-xs">
+                    <span className="text-red-500 font-semibold">{criticalCount} critical</span> ·{" "}
+                    <span className="text-amber-500 font-semibold">{warningCount} warning</span> ·{" "}
+                    <span className="text-emerald-500 font-semibold">{safeCount} safe</span>
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "sites" && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2 space-y-3">
+              <SiteTable analyses={analyses} selectedSiteId={selectedSiteId} onSelectSite={handleSelectSite} />
+              <RiskTypeBreakdown analyses={analyses} />
+            </div>
+            <div className="space-y-3">
+              {selectedAnalysis ? (
+                <SiteDetailPanel analysis={selectedAnalysis} onClose={() => setSelectedSiteId(null)} />
+              ) : (
+                <div className="bg-card border border-card-border rounded-xl p-6 text-center text-sm text-muted-foreground">
+                  <div className="text-4xl opacity-30 mb-2">🗼</div>
+                  <p>Select a site from the table to view detailed analysis</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "technicians" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="xl:col-span-1">
+              <TechnicianRecommendation analyses={analyses} />
+            </div>
+            <div className="xl:col-span-2">
+              <div className="bg-card border border-card-border rounded-xl p-4 shadow-sm">
+                <div className="font-semibold text-sm mb-4 flex items-center gap-2">
+                  <span>🚨</span> Critical Sites — Immediate Deployment Required
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-96 overflow-auto">
+                  {analyses.filter(a => a.overallRisk === "critical").map(a => {
+                    const worst = a.scenarios.reduce((acc, s) => s.riskScore > acc.riskScore ? s : acc);
+                    return (
+                      <button
+                        key={a.site.id}
+                        onClick={() => handleSelectSite(a.site.id)}
+                        className={`text-left p-3 rounded-lg border transition-all hover:shadow-md ${
+                          selectedSiteId === a.site.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-red-200 bg-red-50 hover:border-red-300"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-mono font-bold text-sm">{a.site.id}</span>
+                          <span className="text-xs text-red-600 font-semibold">Score: {a.worstRiskScore}/8</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">{a.site.location}</div>
+                        <div className="text-xs text-muted-foreground mt-1 capitalize">{a.site.siteType.replace("_", " ")} · {a.site.generatorKva} kVA</div>
+                        <div className="flex gap-1 mt-1.5 flex-wrap">
+                          {(["powerRisk", "coolingRisk", "batteryRisk", "rectifierRisk"] as const).map(r => {
+                            const risk = worst[r];
+                            if (risk !== "critical") return null;
+                            const label = r.replace("Risk", "").replace(/([A-Z])/g, " $1").trim();
+                            return (
+                              <span key={r} className="text-[9px] px-1.5 py-0.5 rounded bg-red-100 text-red-700 border border-red-200 font-semibold uppercase">
+                                {label}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="bg-card border border-card-border rounded-xl p-4 shadow-sm mt-4">
+                <div className="font-semibold text-sm mb-4 flex items-center gap-2">
+                  <span>⚠️</span> Warning Sites — Periodic Inspection Required
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 max-h-64 overflow-auto">
+                  {analyses.filter(a => a.overallRisk === "warning").map(a => (
+                    <button
+                      key={a.site.id}
+                      onClick={() => handleSelectSite(a.site.id)}
+                      className={`text-left p-2.5 rounded-lg border transition-all hover:shadow-md ${
+                        selectedSiteId === a.site.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-amber-200 bg-amber-50 hover:border-amber-300"
+                      }`}
+                    >
+                      <div className="font-mono font-bold text-sm">{a.site.id}</div>
+                      <div className="text-xs text-muted-foreground truncate">{a.site.location}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {selectedAnalysis && (
+              <div className="md:col-span-2 xl:col-span-3">
+                <SiteDetailPanel analysis={selectedAnalysis} onClose={() => setSelectedSiteId(null)} />
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      <footer className="border-t border-border bg-muted/30 py-3 px-4 text-center text-xs text-muted-foreground">
+        Hajj 1447 · stc Telecom COW Power & Cooling Risk Dashboard · Nokia Infrastructure · 94 Sites · 46°C Extreme Conditions Analysis
+      </footer>
+    </div>
+  );
+}
