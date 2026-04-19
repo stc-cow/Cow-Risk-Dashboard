@@ -1,4 +1,6 @@
 import { useState, useMemo } from "react";
+import acesLogo from "@assets/ChatGPT_Image_Oct_14,_2025,_10_29_41_PM_1776566555155.png";
+import stcLogo from "@assets/7010.SR.D-9f4e531b_(1)_1776566577166.png";
 import { analyzeSite } from "../lib/calculations";
 import { ALL_SITES } from "../lib/siteData";
 import { MetricCard } from "../components/MetricCard";
@@ -42,18 +44,21 @@ export default function Dashboard() {
       <header className="stc-gradient text-white shadow-lg">
         <div className="max-w-screen-2xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="10" y="2" width="4" height="14" rx="1" fill="white"/>
-                    <rect x="6" y="6" width="12" height="2" rx="1" fill="white"/>
-                    <rect x="4" y="10" width="16" height="2" rx="1" fill="white"/>
-                    <rect x="8" y="16" width="8" height="6" rx="1" fill="white" opacity="0.7"/>
-                    <rect x="11" y="16" width="2" height="6" rx="0.5" fill="white"/>
-                  </svg>
-                </div>
-              </div>
+            <div className="flex items-center gap-4">
+              <img
+                src={stcLogo}
+                alt="stc"
+                className="h-10 w-auto object-contain"
+                style={{ mixBlendMode: "screen" }}
+              />
+              <div className="w-px h-8 bg-white/30" />
+              <img
+                src={acesLogo}
+                alt="ACES Managed Services"
+                className="h-10 w-auto object-contain"
+                style={{ mixBlendMode: "screen" }}
+              />
+              <div className="w-px h-8 bg-white/30" />
               <div>
                 <h1 className="text-lg font-bold tracking-tight">Hajj 1447 COW Risk Dashboard</h1>
               </div>
