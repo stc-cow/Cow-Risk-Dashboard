@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { analyzeSite } from "../lib/calculations";
 import { ALL_SITES } from "../lib/siteData";
 import { MetricCard } from "../components/MetricCard";
-import { SiteMap } from "../components/SiteMap";
+import { LeafletMap } from "../components/LeafletMap";
 import { SiteDetailPanel } from "../components/SiteDetailPanel";
 import { SiteTable } from "../components/SiteTable";
 import { TechnicianRecommendation } from "../components/TechnicianRecommendation";
@@ -166,7 +166,7 @@ export default function Dashboard() {
         {activeTab === "map" && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[calc(100vh-200px)]">
             <div className="lg:col-span-3">
-              <SiteMap analyses={analyses} selectedSiteId={selectedSiteId} onSelectSite={handleSelectSite} />
+              <LeafletMap analyses={analyses} selectedSiteId={selectedSiteId} onSelectSite={handleSelectSite} />
               <div className="mt-3 grid grid-cols-3 gap-3">
                 <RiskDistributionPie analyses={analyses} />
                 <LocationRiskChart analyses={analyses} />

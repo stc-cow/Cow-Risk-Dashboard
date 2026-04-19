@@ -1,0 +1,216 @@
+import { useEffect, useRef, useState } from "react";
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import "leaflet.heat";
+import type { SiteAnalysis } from "../lib/calculations";
+
+// Fix default leaflet icon paths broken by Vite bundling
+delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
+const RISK_COLORS = {
+  safe:     "#00BFB3",
+  warning:  "#FF9AAD",
+  critical: "#E8175D",
+};
+
+const RISK_FILL_OPACITY = {
+  safe:     0.75,
+  warning:  0.85,
+  critical: 0.9,
+};
+
+interface HeatmapLayerProps {
+  analyses: SiteAnalysis[];
+}
+
+function HeatmapLayer({ analyses }: HeatmapLayerProps) {
+  const map = useMap();
+  const layerRef = useRef<L.Layer | null>(null);
+
+  useEffect(() => {
+    if (layerRef.current) {
+      map.removeLayer(layerRef.current);
+    }
+
+    const riskWeight = { safe: 0.2, warning: 0.6, critical: 1.0 };
+
+    const points = analyses.map(a => [
+      a.site.lat,
+      a.site.lng,
+      riskWeight[a.overallRisk],
+    ]) as [number, number, number][];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const heat = (L as any).heatLayer(points, {
+      radius: 30,
+      blur: 25,
+      maxZoom: 14,
+      max: 1.0,
+      gradient: {
+        0.0: "#00BFB3",
+        0.4: "#FF9AAD",
+        0.7: "#E8175D",
+        1.0: "#4A0E8F",
+      },
+    });
+
+    heat.addTo(map);
+    layerRef.current = heat;
+
+    return () => {
+      if (layerRef.current) {
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+    };
+  }, [map, analyses]);
+
+  return null;
+}
+
+interface LeafletMapProps {
+  analyses: SiteAnalysis[];
+  selectedSiteId: string | null;
+  onSelectSite: (id: string) => void;
+}
+
+export function LeafletMap({ analyses, selectedSiteId, onSelectSite }: LeafletMapProps) {
+  const [showHeatmap, setShowHeatmap] = useState(true);
+  const [showMarkers, setShowMarkers] = useState(true);
+
+  const center: [number, number] = [21.38, 39.93];
+
+  return (
+    <div className="relative rounded-xl overflow-hidden border border-border" style={{ height: 460 }}>
+      <MapContainer
+        center={center}
+        zoom={11}
+        style={{ height: "100%", width: "100%" }}
+        zoomControl={true}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+
+        {showHeatmap && <HeatmapLayer analyses={analyses} />}
+
+        {showMarkers && analyses.map(a => {
+          const isSelected = a.site.id === selectedSiteId;
+          const color = RISK_COLORS[a.overallRisk];
+          return (
+            <CircleMarker
+              key={a.site.id}
+              center={[a.site.lat, a.site.lng]}
+              radius={isSelected ? 11 : 7}
+              pathOptions={{
+                color: isSelected ? "#4A0E8F" : color,
+                fillColor: color,
+                fillOpacity: RISK_FILL_OPACITY[a.overallRisk],
+                weight: isSelected ? 3 : 1.5,
+              }}
+              eventHandlers={{
+                click: () => onSelectSite(a.site.id),
+              }}
+            >
+              <Popup maxWidth={260} minWidth={220}>
+                <div className="p-1">
+                  <div className="font-bold text-sm mb-1">{a.site.id}</div>
+                  <div className="text-xs text-gray-500 mb-2">{a.site.location}</div>
+                  <div className="flex gap-1.5 flex-wrap mb-2">
+                    <span
+                      className="text-[10px] px-2 py-0.5 rounded font-bold uppercase"
+                      style={{
+                        background: a.overallRisk === "safe" ? "#d0f5f3" : a.overallRisk === "warning" ? "#ffe0e8" : "#fce4ed",
+                        color: a.overallRisk === "safe" ? "#00736b" : a.overallRisk === "warning" ? "#a03050" : "#b01040",
+                        border: `1px solid ${RISK_COLORS[a.overallRisk]}`,
+                      }}
+                    >
+                      {a.overallRisk}
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 capitalize">
+                      {a.site.siteType.replace("_", " ")}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-600 space-y-0.5">
+                    <div>Generator: <span className="font-semibold">{a.site.generatorKva} kVA</span></div>
+                    <div>Battery: <span className="font-semibold">{a.site.batteryCapacityAh} Ah {a.site.batteryType.replace("_", "-")}</span></div>
+                    <div>AC1: <span className="font-semibold">{(a.site.ac1CapacityBtu / 1000).toFixed(0)}k BTU/h</span></div>
+                  </div>
+                  <button
+                    onClick={() => onSelectSite(a.site.id)}
+                    className="mt-2 w-full text-[11px] py-1 rounded text-white font-semibold"
+                    style={{ background: "#4A0E8F" }}
+                  >
+                    View Full Analysis
+                  </button>
+                </div>
+              </Popup>
+            </CircleMarker>
+          );
+        })}
+      </MapContainer>
+
+      {/* Map controls overlay */}
+      <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-1.5">
+        <button
+          onClick={() => setShowHeatmap(h => !h)}
+          className="px-3 py-1.5 text-[11px] font-semibold rounded-lg shadow-md border transition-all"
+          style={{
+            background: showHeatmap ? "#4A0E8F" : "white",
+            color: showHeatmap ? "white" : "#4A0E8F",
+            borderColor: "#4A0E8F",
+          }}
+        >
+          {showHeatmap ? "Hide" : "Show"} Heatmap
+        </button>
+        <button
+          onClick={() => setShowMarkers(m => !m)}
+          className="px-3 py-1.5 text-[11px] font-semibold rounded-lg shadow-md border transition-all"
+          style={{
+            background: showMarkers ? "#4A0E8F" : "white",
+            color: showMarkers ? "white" : "#4A0E8F",
+            borderColor: "#4A0E8F",
+          }}
+        >
+          {showMarkers ? "Hide" : "Show"} Markers
+        </button>
+      </div>
+
+      {/* Legend */}
+      <div className="absolute bottom-8 right-3 z-[1000] bg-white/95 backdrop-blur rounded-xl px-3 py-2.5 text-xs shadow-lg border border-gray-200">
+        <div className="font-bold text-gray-700 mb-1.5 uppercase tracking-wide text-[10px]">Risk Level</div>
+        {(["safe", "warning", "critical"] as const).map(r => (
+          <div key={r} className="flex items-center gap-2 mb-1">
+            <span className="w-3 h-3 rounded-full inline-block border border-white shadow-sm" style={{ background: RISK_COLORS[r] }} />
+            <span className="capitalize text-gray-600 font-medium">{r}</span>
+          </div>
+        ))}
+        <div className="border-t border-gray-100 mt-1.5 pt-1.5 text-[10px] text-gray-400">
+          {analyses.length} sites plotted
+        </div>
+      </div>
+
+      {/* Heatmap gradient legend */}
+      {showHeatmap && (
+        <div className="absolute bottom-8 left-3 z-[1000] bg-white/95 backdrop-blur rounded-xl px-3 py-2.5 text-xs shadow-lg border border-gray-200">
+          <div className="font-bold text-gray-700 mb-1.5 uppercase tracking-wide text-[10px]">Risk Intensity</div>
+          <div
+            className="w-28 h-2.5 rounded-full mb-1"
+            style={{ background: "linear-gradient(to right, #00BFB3, #FF9AAD, #E8175D, #4A0E8F)" }}
+          />
+          <div className="flex justify-between text-[9px] text-gray-400">
+            <span>Low</span>
+            <span>High</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
