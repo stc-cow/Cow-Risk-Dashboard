@@ -82,7 +82,7 @@ interface LeafletMapProps {
 
 export function LeafletMap({ analyses, selectedSiteId, onSelectSite }: LeafletMapProps) {
   const [showHeatmap, setShowHeatmap] = useState(true);
-  const [showMarkers, setShowMarkers] = useState(true);
+  const [showMarkers, setShowMarkers] = useState(false);
 
   const center: [number, number] = [21.38, 39.93];
 
