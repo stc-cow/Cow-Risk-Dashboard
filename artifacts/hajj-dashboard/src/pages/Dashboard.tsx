@@ -56,10 +56,6 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-lg font-bold tracking-tight">Hajj 1447 COW Risk Dashboard</h1>
-                <p className="text-purple-200 text-xs">stc Nokia Infrastructure · 94 Sites · 46°C Operating Conditions</p>
-                <p className="text-purple-300 text-[10px] mt-0.5">Real-time power, cooling, battery & rectifier risk monitoring across 77 Nokia COW sites in Makkah, Mina, Muzdalifah & Arafat.</p>
-                <p className="text-purple-300 text-[10px]">Engineering calculations at 46°C extreme conditions across 9 operational scenarios with full risk classification.</p>
-                <p className="text-purple-300 text-[10px]">Supports field technician deployment planning and prioritisation for stc Hajj 1447 season operations.</p>
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
