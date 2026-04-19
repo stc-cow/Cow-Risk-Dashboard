@@ -7,7 +7,13 @@ interface RiskChartsProps {
   analyses: SiteAnalysis[];
 }
 
-const COLORS = { safe: "#16a34a", warning: "#d97706", critical: "#dc2626" };
+const COLORS = {
+  safe: "#00BFB3",
+  warning: "#FF9AAD",
+  critical: "#E8175D",
+};
+
+const STC_PALETTE = ["#E8175D", "#00BFB3", "#4A0E8F", "#FF9AAD", "#6CD5DE", "#8B5EC5"];
 
 export function RiskDistributionPie({ analyses }: RiskChartsProps) {
   const safe = analyses.filter(a => a.overallRisk === "safe").length;

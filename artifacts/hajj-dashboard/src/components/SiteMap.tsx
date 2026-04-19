@@ -29,9 +29,9 @@ export function SiteMap({ analyses, selectedSiteId, onSelectSite }: SiteMapProps
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const riskColor = (r: "safe" | "warning" | "critical") =>
-    r === "safe" ? "#16a34a" : r === "warning" ? "#d97706" : "#dc2626";
+    r === "safe" ? "#00BFB3" : r === "warning" ? "#FF9AAD" : "#E8175D";
   const riskStroke = (r: "safe" | "warning" | "critical") =>
-    r === "safe" ? "#15803d" : r === "warning" ? "#b45309" : "#b91c1c";
+    r === "safe" ? "#00968c" : r === "warning" ? "#c0506a" : "#b01040";
 
   return (
     <div className="relative bg-gradient-to-br from-amber-50 via-stone-100 to-amber-50 rounded-xl overflow-hidden border border-border" style={{ height: 420 }}>
@@ -112,9 +112,9 @@ export function SiteMap({ analyses, selectedSiteId, onSelectSite }: SiteMapProps
 
       <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur rounded-lg px-3 py-2 text-xs space-y-1 border border-border shadow">
         <div className="font-semibold text-foreground mb-1 text-[11px] uppercase tracking-wide">Risk Legend</div>
-        <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"/><span>Safe</span></div>
-        <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"/><span>Warning</span></div>
-        <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"/><span>Critical</span></div>
+        <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{background:"#00BFB3"}}/><span>Safe</span></div>
+        <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{background:"#FF9AAD"}}/><span>Warning</span></div>
+        <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{background:"#E8175D"}}/><span>Critical</span></div>
       </div>
     </div>
   );

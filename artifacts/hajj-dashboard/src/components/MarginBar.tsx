@@ -8,13 +8,13 @@ interface MarginBarProps {
 
 export function MarginBar({ label, value, unit = "kW", max = 20, risk }: MarginBarProps) {
   const pct = Math.min(Math.max((value / max) * 100, 0), 100);
-  const barColor = risk === "safe" ? "bg-emerald-500" : risk === "warning" ? "bg-amber-400" : "bg-red-500";
+  const barColor = risk === "safe" ? "bg-[#00BFB3]" : risk === "warning" ? "bg-[#FF9AAD]" : "bg-[#E8175D]";
 
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-xs">
         <span className="text-muted-foreground font-medium">{label}</span>
-        <span className={`font-bold ${risk === "safe" ? "text-emerald-600" : risk === "warning" ? "text-amber-600" : "text-red-600"}`}>
+        <span className={`font-bold ${risk === "safe" ? "text-[#00968c]" : risk === "warning" ? "text-[#c0506a]" : "text-[#e8175d]"}`}>
           {value > 0 ? "+" : ""}{value.toFixed(1)} {unit}
         </span>
       </div>

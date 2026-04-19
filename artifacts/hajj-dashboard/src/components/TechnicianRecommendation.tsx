@@ -31,15 +31,15 @@ export function TechnicianRecommendation({ analyses }: TechnicianRecommendationP
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <div className="text-center p-3 bg-red-50 rounded-lg border border-red-100">
-          <div className="text-2xl font-bold text-red-600">{techForCritical}</div>
-          <div className="text-xs text-red-700 font-medium mt-0.5">High Risk Techs</div>
-          <div className="text-[10px] text-red-500 mt-1">1 per 3 critical sites</div>
+        <div className="text-center p-3 rounded-lg border" style={{background:"#fce4ed", borderColor:"#E8175D"}}>
+          <div className="text-2xl font-bold" style={{color:"#E8175D"}}>{techForCritical}</div>
+          <div className="text-xs font-medium mt-0.5" style={{color:"#b01040"}}>High Risk Techs</div>
+          <div className="text-[10px] mt-1" style={{color:"#E8175D"}}>1 per 3 critical sites</div>
         </div>
-        <div className="text-center p-3 bg-amber-50 rounded-lg border border-amber-100">
-          <div className="text-2xl font-bold text-amber-600">{techForWarning}</div>
-          <div className="text-xs text-amber-700 font-medium mt-0.5">Med Risk Techs</div>
-          <div className="text-[10px] text-amber-500 mt-1">1 per 6 warning sites</div>
+        <div className="text-center p-3 rounded-lg border" style={{background:"#ffe0e8", borderColor:"#FF9AAD"}}>
+          <div className="text-2xl font-bold" style={{color:"#c0506a"}}>{techForWarning}</div>
+          <div className="text-xs font-medium mt-0.5" style={{color:"#a03050"}}>Med Risk Techs</div>
+          <div className="text-[10px] mt-1" style={{color:"#c0506a"}}>1 per 6 warning sites</div>
         </div>
         <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
           <div className="text-2xl font-bold text-blue-600">{totalTech}</div>
@@ -58,9 +58,9 @@ export function TechnicianRecommendation({ analyses }: TechnicianRecommendationP
               <div key={loc} className="flex items-center gap-2">
                 <div className="text-xs text-muted-foreground w-36 truncate">{loc}</div>
                 <div className="flex-1 h-4 bg-muted rounded-full overflow-hidden flex">
-                  <div className="bg-red-500 h-full" style={{ width: `${(counts.critical / total) * 100}%` }} />
-                  <div className="bg-amber-400 h-full" style={{ width: `${(counts.warning / total) * 100}%` }} />
-                  <div className="bg-emerald-500 h-full" style={{ width: `${(counts.safe / total) * 100}%` }} />
+                  <div className="h-full" style={{ width: `${(counts.critical / total) * 100}%`, background:"#E8175D" }} />
+                  <div className="h-full" style={{ width: `${(counts.warning / total) * 100}%`, background:"#FF9AAD" }} />
+                  <div className="h-full" style={{ width: `${(counts.safe / total) * 100}%`, background:"#00BFB3" }} />
                 </div>
                 <div className="text-xs font-semibold w-12 text-right">{techNeeded > 0 ? `${techNeeded} tech` : "Remote"}</div>
               </div>

@@ -49,9 +49,9 @@ export function SiteDetailPanel({ analysis, onClose }: SiteDetailPanelProps) {
               return acc;
             }, "safe" as "safe" | "warning" | "critical");
 
-            const bg = worstRisk === "safe" ? "bg-emerald-50 border-emerald-200 text-emerald-800" :
-              worstRisk === "warning" ? "bg-amber-50 border-amber-200 text-amber-800" :
-              "bg-red-50 border-red-200 text-red-800";
+            const bg = worstRisk === "safe" ? "bg-[#d0f5f3] border-[#00BFB3] text-[#00736b]" :
+              worstRisk === "warning" ? "bg-[#ffe0e8] border-[#FF9AAD] text-[#a03050]" :
+              "bg-[#fce4ed] border-[#E8175D] text-[#b01040]";
             const activeCls = activeScenario === i ? "ring-2 ring-primary ring-offset-1 font-bold" : "";
 
             return (

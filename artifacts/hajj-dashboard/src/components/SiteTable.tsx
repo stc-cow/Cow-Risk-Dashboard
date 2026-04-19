@@ -52,9 +52,9 @@ export function SiteTable({ analyses, selectedSiteId, onSelectSite }: SiteTableP
               onClick={() => setFilter(f)}
               className={`px-2.5 py-1 text-xs rounded font-medium capitalize transition-colors ${
                 filter === f
-                  ? f === "safe" ? "bg-emerald-500 text-white" :
-                    f === "warning" ? "bg-amber-500 text-white" :
-                    f === "critical" ? "bg-red-500 text-white" :
+                  ? f === "safe" ? "bg-[#00BFB3] text-white" :
+                    f === "warning" ? "bg-[#FF9AAD] text-white" :
+                    f === "critical" ? "bg-[#E8175D] text-white" :
                     "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}

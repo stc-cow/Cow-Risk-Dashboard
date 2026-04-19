@@ -230,12 +230,13 @@ export default function Dashboard() {
                         key={a.site.id}
                         onClick={() => handleSelectSite(a.site.id)}
                         className={`text-left p-3 rounded-lg border transition-all hover:shadow-md ${
-                          selectedSiteId === a.site.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-red-200 bg-red-50 hover:border-red-300"
+                          selectedSiteId === a.site.id ? "border-primary bg-primary/5 ring-1 ring-primary" : ""
                         }`}
+                        style={selectedSiteId !== a.site.id ? {background:"#fce4ed", borderColor:"#E8175D"} : {}}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-mono font-bold text-sm">{a.site.id}</span>
-                          <span className="text-xs text-red-600 font-semibold">Score: {a.worstRiskScore}/8</span>
+                          <span className="text-xs font-semibold" style={{color:"#E8175D"}}>Score: {a.worstRiskScore}/8</span>
                         </div>
                         <div className="text-xs text-muted-foreground">{a.site.location}</div>
                         <div className="text-xs text-muted-foreground mt-1 capitalize">{a.site.siteType.replace("_", " ")} · {a.site.generatorKva} kVA</div>
@@ -245,7 +246,7 @@ export default function Dashboard() {
                             if (risk !== "critical") return null;
                             const label = r.replace("Risk", "").replace(/([A-Z])/g, " $1").trim();
                             return (
-                              <span key={r} className="text-[9px] px-1.5 py-0.5 rounded bg-red-100 text-red-700 border border-red-200 font-semibold uppercase">
+                              <span key={r} className="text-[9px] px-1.5 py-0.5 rounded font-semibold uppercase" style={{background:"#fce4ed", color:"#b01040", border:"1px solid #E8175D"}}>
                                 {label}
                               </span>
                             );
@@ -267,8 +268,9 @@ export default function Dashboard() {
                       key={a.site.id}
                       onClick={() => handleSelectSite(a.site.id)}
                       className={`text-left p-2.5 rounded-lg border transition-all hover:shadow-md ${
-                        selectedSiteId === a.site.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-amber-200 bg-amber-50 hover:border-amber-300"
+                        selectedSiteId === a.site.id ? "border-primary bg-primary/5 ring-1 ring-primary" : ""
                       }`}
+                      style={selectedSiteId !== a.site.id ? {background:"#ffe0e8", borderColor:"#FF9AAD"} : {}}
                     >
                       <div className="font-mono font-bold text-sm">{a.site.id}</div>
                       <div className="text-xs text-muted-foreground truncate">{a.site.location}</div>
