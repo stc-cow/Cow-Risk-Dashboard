@@ -64,10 +64,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1.5 text-sm">
-                <div className="w-2 h-2 rounded-full bg-purple-300 animate-pulse"></div>
-                <span className="text-purple-100 text-xs">Live Monitoring</span>
-              </div>
+
               <div className="flex gap-2">
                 <div className="bg-red-500/30 border border-red-400/30 rounded-lg px-3 py-1.5 text-center">
                   <div className="text-lg font-bold text-red-200">{criticalCount}</div>
