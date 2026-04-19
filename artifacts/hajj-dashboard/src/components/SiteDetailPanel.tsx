@@ -20,11 +20,11 @@ export function SiteDetailPanel({ analysis, onClose }: SiteDetailPanelProps) {
       <div className="stc-gradient px-4 py-3 flex items-center justify-between">
         <div>
           <div className="text-white font-bold text-base">{site.id}</div>
-          <div className="text-green-200 text-xs">{site.name}</div>
+          <div className="text-purple-200 text-xs">{site.name}</div>
         </div>
         <div className="flex items-center gap-2">
           <RiskBadge risk={analysis.overallRisk} size="md" />
-          <button onClick={onClose} className="text-green-200 hover:text-white transition-colors ml-2 text-lg font-bold">✕</button>
+          <button onClick={onClose} className="text-purple-200 hover:text-white transition-colors ml-2 text-lg font-bold">✕</button>
         </div>
       </div>
 

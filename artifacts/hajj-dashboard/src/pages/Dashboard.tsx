@@ -56,13 +56,13 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-lg font-bold tracking-tight">Hajj 1447 COW Risk Dashboard</h1>
-                <p className="text-green-200 text-xs">stc Nokia Infrastructure · 94 Sites · 46°C Operating Conditions</p>
+                <p className="text-purple-200 text-xs">stc Nokia Infrastructure · 94 Sites · 46°C Operating Conditions</p>
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1.5 text-sm">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                <span className="text-green-100 text-xs">Live Monitoring</span>
+                <div className="w-2 h-2 rounded-full bg-purple-300 animate-pulse"></div>
+                <span className="text-purple-100 text-xs">Live Monitoring</span>
               </div>
               <div className="flex gap-2">
                 <div className="bg-red-500/30 border border-red-400/30 rounded-lg px-3 py-1.5 text-center">
@@ -88,7 +88,7 @@ export default function Dashboard() {
                 className={`px-3 py-1.5 text-xs font-medium rounded-t-lg transition-colors flex items-center gap-1.5 ${
                   activeTab === t.key
                     ? "bg-background text-foreground"
-                    : "text-green-200 hover:text-white hover:bg-white/10"
+                    : "text-purple-200 hover:text-white hover:bg-white/10"
                 }`}
               >
                 <span>{t.icon}</span>

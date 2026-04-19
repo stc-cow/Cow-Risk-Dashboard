@@ -79,14 +79,14 @@
   --card: 0 0% 100%;
   --card-foreground: 215 25% 15%;
   --card-border: 215 20% 90%;
-  --sidebar: 145 45% 22%;
+  --sidebar: 270 70% 28%;
   --sidebar-foreground: 0 0% 95%;
-  --sidebar-border: 145 40% 18%;
-  --sidebar-primary: 145 65% 45%;
+  --sidebar-border: 270 60% 22%;
+  --sidebar-primary: 270 75% 55%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 145 40% 28%;
+  --sidebar-accent: 270 55% 35%;
   --sidebar-accent-foreground: 0 0% 95%;
-  --sidebar-ring: 145 65% 45%;
+  --sidebar-ring: 270 75% 55%;
   --popover: 0 0% 100%;
   --popover-foreground: 215 25% 15%;
   --popover-border: 215 20% 88%;
@@ -154,7 +154,7 @@
 .site-marker-warning { background: #d97706; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(217,119,6,0.5); }
 .site-marker-critical { background: #dc2626; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(220,38,38,0.5); }
 
-.stc-gradient { background: linear-gradient(135deg, #0d6e35 0%, #1a9950 50%, #0d6e35 100%); }
+.stc-gradient { background: linear-gradient(135deg, #4a0e8f 0%, #6b21c8 50%, #4a0e8f 100%); }
 .gold-accent { color: #d4a017; }
 
 @keyframes pulse-ring {
