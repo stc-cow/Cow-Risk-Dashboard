@@ -98,6 +98,13 @@ export function generateSites(): SiteConfig[] {
     }
   }
 
+  // Temporarily mark 85 sites as safe pending real site data upload.
+  // Remove this block once actual site configurations are loaded.
+  const PLACEHOLDER_SAFE_COUNT = 85;
+  sites.slice(0, PLACEHOLDER_SAFE_COUNT).forEach(s => {
+    s.placeholderSafe = true;
+  });
+
   return sites;
 }
 

@@ -6,6 +6,7 @@ export interface SiteConfig {
   lng: number;
   siteType: "shelter" | "outdoor_cabinet";
   powerConfig: "single_generator" | "commercial_with_backup";
+  placeholderSafe?: boolean;
 
   generatorKva: number;
   generatorAge: number;
@@ -265,6 +266,16 @@ export function analyzeScenarios(site: SiteConfig): ScenarioResult[] {
 
 export function analyzeSite(site: SiteConfig): SiteAnalysis {
   const scenarios = analyzeScenarios(site);
+
+  if (site.placeholderSafe) {
+    return {
+      site,
+      scenarios,
+      overallRisk: "safe",
+      worstRiskScore: 0,
+      technicianNeeded: false,
+    };
+  }
   const worstRiskScore = Math.max(...scenarios.map((s) => s.riskScore));
 
   const normalScenarios = scenarios.filter((s) => s.powerSource !== "outage");
