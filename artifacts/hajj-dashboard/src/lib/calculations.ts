@@ -41,9 +41,9 @@ export interface SiteConfig {
 
   // Telecom loads
   telecomPowerKw: number;     // Total telecom KW — used for ALL power margin formulas
-  telecomHeatKBtuH: number;   // Heat dissipation inside cooled space (KBtu/h) — drives AC heat load
-                              //   Shelter sites : indoor equipment only
-                              //   Outdoor cabinet: = telecomPowerKw × 3.412 (all heat inside cabinet)
+  telecomHeatKBtuH: number;   // Heat dissipation inside cooled space — directly from spreadsheet
+                              //   column "Telecom load heat dissipation KBtu/h", stored as-is
+                              //   Engine converts: KBtu/h × 1000 → Btu/h for cooling margin formula
 
   // Cooling
   ac1CapacityBtu: number;
