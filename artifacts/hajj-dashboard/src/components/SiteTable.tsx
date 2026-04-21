@@ -92,7 +92,11 @@ export function SiteTable({ analyses, selectedSiteId, onSelectSite }: SiteTableP
                   <td className="px-3 py-2 font-mono font-bold text-foreground">{a.site.id}</td>
                   <td className="px-3 py-2 text-muted-foreground truncate max-w-28">{a.site.location}</td>
                   <td className="px-3 py-2 capitalize">{a.site.siteType.replace("_", " ")}</td>
-                  <td className="px-3 py-2">{a.site.generatorKva} kVA</td>
+                  <td className="px-3 py-2">
+                    {a.site.powerConfig === "commercial_with_backup"
+                      ? `SEC ${a.site.secCapacityAmp ?? "—"}A / Gen ${a.site.backupGeneratorKva ?? "—"}kVA`
+                      : `${a.site.generatorKva} kVA`}
+                  </td>
                   <td className="px-3 py-2">{ws ? ws.batteryUsefulHours.toFixed(2) + "h" : "—"}</td>
                   <td className="px-3 py-2">
                     <div className="flex gap-0.5">

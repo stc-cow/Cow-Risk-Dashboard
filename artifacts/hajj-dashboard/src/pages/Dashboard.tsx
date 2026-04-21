@@ -240,7 +240,7 @@ export default function Dashboard() {
                           <span className="text-xs font-semibold" style={{color:"#E8175D"}}>Score: {a.worstRiskScore}/4</span>
                         </div>
                         <div className="text-xs text-muted-foreground">{a.site.location}</div>
-                        <div className="text-xs text-muted-foreground mt-1 capitalize">{a.site.siteType.replace("_", " ")} · {a.site.generatorKva} kVA</div>
+                        <div className="text-xs text-muted-foreground mt-1 capitalize">{a.site.siteType.replace("_", " ")} · {a.site.powerConfig === "commercial_with_backup" ? `SEC ${a.site.secCapacityAmp ?? "—"}A` : `${a.site.generatorKva} kVA`}</div>
                         {worst && (
                           <div className="flex gap-1 mt-1.5 flex-wrap">
                             {(["powerRisk", "coolingRisk", "batteryRisk", "rectifierRisk"] as const).map(r => {

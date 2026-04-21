@@ -31,7 +31,11 @@ export function SiteDetailPanel({ analysis, onClose }: SiteDetailPanelProps) {
       <div className="px-4 py-3 border-b border-border bg-muted/40 grid grid-cols-2 gap-2 text-xs">
         <div><span className="text-muted-foreground">Type:</span> <span className="font-semibold capitalize">{site.siteType.replace("_", " ")}</span></div>
         <div><span className="text-muted-foreground">Power:</span> <span className="font-semibold capitalize">{site.powerConfig.replace(/_/g, " ")}</span></div>
-        <div><span className="text-muted-foreground">Generator:</span> <span className="font-semibold">{site.generatorKva} kVA (Age: {site.generatorAge}yr)</span></div>
+        <div><span className="text-muted-foreground">Power Source:</span> <span className="font-semibold">
+          {site.powerConfig === "commercial_with_backup"
+            ? `SEC ${site.secCapacityAmp ?? "—"}A / Backup Gen ${site.backupGeneratorKva ?? "—"} kVA`
+            : `Generator ${site.generatorKva} kVA`}
+        </span></div>
         <div><span className="text-muted-foreground">Battery:</span> <span className="font-semibold">{site.batteryCapacityAh} Ah {site.batteryType.replace("_", "-")}</span></div>
         <div><span className="text-muted-foreground">AC1:</span> <span className="font-semibold">{(site.ac1CapacityBtu / 1000).toFixed(0)}k BTU/h</span></div>
         <div><span className="text-muted-foreground">AC2:</span> <span className="font-semibold">{site.ac2CapacityBtu ? `${(site.ac2CapacityBtu / 1000).toFixed(0)}k BTU/h` : "—"}</span></div>

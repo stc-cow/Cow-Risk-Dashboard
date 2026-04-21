@@ -34,6 +34,7 @@ export interface SiteConfig {
   // Prime power source
   generatorKva: number;    // KVA  (SB: SEC_Amps × 0.5, age=0; SG: gen KVA)
   generatorAge: number;    // years
+  secCapacityAmp?: number; // SEC meter capacity in Amps (SB sites only — for display)
 
   // Backup power (SB sites only)
   backupGeneratorKva?: number;
