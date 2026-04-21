@@ -1,10 +1,10 @@
 import type { SiteConfig } from "./calculations";
 
 // ─── Real Hajj 1447 COW Data ───────────────────────────────────────────────
-// telecomPowerKw  = total load (outdoor + indoor) → used in ALL power margins
-// telecomHeatKw   = heat-generating load inside cooled space:
-//    shelter sites  → indoor/shelter equipment only (≈43% of outdoor load)
-//    outdoor cabinet→ = telecomPowerKw (all equipment heat inside the cabinet)
+// telecomPowerKw    = total load (outdoor + indoor) → used in ALL power margins
+// telecomHeatKBtuH  = heat dissipation inside cooled space (KBtu/h):
+//    shelter sites  → indoor/shelter equipment only
+//    outdoor cabinet→ = telecomPowerKw × 3.412 (all equipment heat inside the cabinet)
 //
 // SB sites: generatorKva = SEC_Amps × 0.5, generatorAge = 0 (grid)
 // SG sites: generatorKva = rated gen KVA, generatorAge from working hours
@@ -29,7 +29,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 600,                     // 200Ah × 3 strings
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 12.0,                       // EXACT: outdoor 8.4 + indoor 3.6
-      telecomHeatKw:  3.6,                        // EXACT: indoor shelter load
+      telecomHeatKBtuH: 12.28,                     // EXACT: 3.6 KW × 3.412 = indoor shelter heat
     },
 
     // CWN923  SG  Arafat  gen=30KVA@3110h≈0yr
@@ -44,7 +44,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 950,                     // 190Ah × 5 strings
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 15.0,                       // outdoor 10.5 + indoor 4.5
-      telecomHeatKw:  4.5,
+      telecomHeatKBtuH: 15.35,
     },
 
     // CWN991  SB  Arafat  SEC=100A  backupGen=30KVA@15578h≈1yr
@@ -60,7 +60,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,                     // 200Ah × 4 strings
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 12.0,
-      telecomHeatKw:  3.6,
+      telecomHeatKBtuH: 12.28,
     },
 
     // CWN092  SG  Arafat  gen=30KVA@25098h≈2yr  telecom=0
@@ -75,7 +75,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 400,                     // 200Ah × 2 strings
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 0,
-      telecomHeatKw:  0,
+      telecomHeatKBtuH:  0,
     },
 
     // CWN076  SG  Arafat  gen=30KVA@18324h≈2yr
@@ -90,7 +90,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 1400,                    // 200Ah × 7 strings
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 12.0,
-      telecomHeatKw:  3.6,
+      telecomHeatKBtuH: 12.28,
     },
 
     // CWN108  SB  Arafat  SEC=100A  backupGen=30KVA@42885h≈4yr
@@ -106,7 +106,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 600,                     // 200Ah × 3 strings
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 12.0,
-      telecomHeatKw:  3.6,
+      telecomHeatKBtuH: 12.28,
     },
 
     // CWN087  SB  Arafat  SEC=70A  backupGen=35KVA@0h
@@ -122,7 +122,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 760,                     // 190Ah × 4 strings
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 12.0,
-      telecomHeatKw:  3.6,
+      telecomHeatKBtuH: 12.28,
     },
 
     // CWN075  SB  Arafat  SEC=100A  backupGen=35KVA@1798h≈0yr
@@ -138,7 +138,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 12.0,
-      telecomHeatKw:  3.6,
+      telecomHeatKBtuH: 12.28,
     },
 
     // CWN072  SB  Arafat  SEC=100A  backupGen=25KVA@0h
@@ -154,7 +154,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 1475,                    // 295Ah × 5 strings
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 12.0,
-      telecomHeatKw:  3.6,
+      telecomHeatKBtuH: 12.28,
     },
 
     // CWN078  SB  Arafat  SEC=100A  backupGen=35KVA@0h
@@ -170,7 +170,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 12.0,
-      telecomHeatKw:  3.6,
+      telecomHeatKBtuH: 12.28,
     },
 
     // CWN080  SG  Arafat  gen=35KVA@22058h≈2yr  telecom=0
@@ -185,7 +185,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 760,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 0,
-      telecomHeatKw:  0,
+      telecomHeatKBtuH:  0,
     },
 
     // CWN084  SB  Arafat  SEC=100A  backupGen=35KVA@0h
@@ -201,7 +201,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 15.0,
-      telecomHeatKw:  4.5,
+      telecomHeatKBtuH: 15.35,
     },
 
     // CWN085  SB  Arafat  SEC=100A  backupGen=35KVA@0h
@@ -217,7 +217,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 760,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 12.0,
-      telecomHeatKw:  3.6,
+      telecomHeatKBtuH: 12.28,
     },
 
     // CWN073  SB  Arafat  SEC=100A  backupGen=45KVA@0h
@@ -233,7 +233,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 17.0,                       // outdoor 11.9 + indoor 5.1
-      telecomHeatKw:  5.1,
+      telecomHeatKBtuH: 17.40,
     },
 
     // CWN093  SB  Arafat  SEC=200A  backupGen=45KVA@31766h≈3yr
@@ -249,7 +249,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 1600,                    // 200Ah × 8 strings
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 15.0,
-      telecomHeatKw:  4.5,
+      telecomHeatKBtuH: 15.35,
     },
 
     // CWN038  SG  Arafat  gen=30KVA@1525h≈0yr  telecom=0
@@ -264,7 +264,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 1400,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 0,
-      telecomHeatKw:  0,
+      telecomHeatKBtuH:  0,
     },
 
     // CWN083  SG  Arafat  gen=35KVA@6125h≈0yr
@@ -279,7 +279,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 600,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 12.0,
-      telecomHeatKw:  3.6,
+      telecomHeatKBtuH: 12.28,
     },
 
     // CWN908  Pending data — placeholder safe
@@ -293,7 +293,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 0,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 0,
-      telecomHeatKw:  0,
+      telecomHeatKBtuH:  0,
       placeholderSafe: true,
     },
 
@@ -310,11 +310,11 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 1600,                    // 200Ah × 8 strings
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 15.0,
-      telecomHeatKw:  4.5,
+      telecomHeatKBtuH: 15.35,
     },
 
     // ── OUTDOOR CABINET SITES ──────────────────────────────────────────────
-    // All telecom heat goes inside the cabinet → telecomHeatKw = telecomPowerKw
+    // All telecom heat goes inside the cabinet → telecomHeatKBtuH = telecomPowerKw × 3.412
 
     // CWN206  SG  Muzdalifah  gen=30KVA@32553h≈3yr  telecom=0
     {
@@ -327,7 +327,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 0,
-      telecomHeatKw:  0,
+      telecomHeatKBtuH:  0,
     },
 
     // CWN956  SB  Arafat  SEC=100A  backupGen=30KVA@0h
@@ -342,7 +342,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 10.56,
-      telecomHeatKw:  10.56,
+      telecomHeatKBtuH: 36.03,
     },
 
     // CWN980  SB  Arafat  SEC=100A  backupGen=30KVA@0h
@@ -357,7 +357,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 10.56,
-      telecomHeatKw:  10.56,
+      telecomHeatKBtuH: 36.03,
     },
 
     // CWN951  SB  Arafat  SEC=100A  backupGen=30KVA@0h
@@ -372,7 +372,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 10.56,
-      telecomHeatKw:  10.56,
+      telecomHeatKBtuH: 36.03,
     },
 
     // CWN020  SB  Arafat  SEC=100A  backupGen=35KVA@2350h≈0yr
@@ -387,7 +387,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 13.2,
-      telecomHeatKw:  13.2,
+      telecomHeatKBtuH: 45.04,
     },
 
     // CWN901  SG  Arafat  gen=30KVA@12495h≈1yr  telecom=0
@@ -401,7 +401,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 0,
-      telecomHeatKw:  0,
+      telecomHeatKBtuH:  0,
     },
 
     // CWN203  SB  Arafat  SEC=100A  backupGen=35KVA@0h
@@ -416,7 +416,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 14.98,
-      telecomHeatKw:  14.98,
+      telecomHeatKBtuH: 51.11,
     },
 
     // CWN914  SB  Arafat  SEC=100A  backupGen=30KVA@0h
@@ -431,7 +431,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 10.56,
-      telecomHeatKw:  10.56,
+      telecomHeatKBtuH: 36.03,
     },
 
     // CWN015  SB  Arafat  SEC=100A  backupGen=30KVA@0h
@@ -446,7 +446,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 10.56,
-      telecomHeatKw:  10.56,
+      telecomHeatKBtuH: 36.03,
     },
 
     // CWN212  SB  Arafat  SEC=100A  backupGen=35KVA@0h
@@ -461,7 +461,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 13.2,
-      telecomHeatKw:  13.2,
+      telecomHeatKBtuH: 45.04,
     },
 
     // CWN992  SB  Muzdalifah  SEC=60A  backupGen=30KVA@0h
@@ -476,7 +476,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 760,                     // 190Ah × 4 strings
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 10.56,
-      telecomHeatKw:  10.56,
+      telecomHeatKBtuH: 36.03,
     },
 
     // CWN205  SG  Muzdalifah  gen=30KVA@3492h≈0yr  telecom=0
@@ -490,7 +490,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 0,
-      telecomHeatKw:  0,
+      telecomHeatKBtuH:  0,
     },
 
     // CWN960  SB  Arafat  SEC=100A  backupGen=45KVA@918h≈0yr  AC1+AC2
@@ -506,7 +506,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 10.56,
-      telecomHeatKw:  10.56,
+      telecomHeatKBtuH: 36.03,
     },
 
     // CWN984  SG  Arafat  gen=30KVA@9331h≈1yr  AC1+AC2
@@ -521,7 +521,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 760,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 10.56,
-      telecomHeatKw:  10.56,
+      telecomHeatKBtuH: 36.03,
     },
 
     // CWN996  SG  Arafat  gen=30KVA@19356h≈2yr  telecom=0
@@ -535,7 +535,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 760,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 0,
-      telecomHeatKw:  0,
+      telecomHeatKBtuH:  0,
     },
 
     // CWN906  SB  Arafat  SEC=100A  backupGen=30KVA@0h
@@ -550,7 +550,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 760,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 13.2,
-      telecomHeatKw:  13.2,
+      telecomHeatKBtuH: 45.04,
     },
 
     // CWN214  SB  Muzdalifah  SEC=100A  backupGen=35KVA@5091h≈0yr  AC1+AC2
@@ -566,7 +566,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 760,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 14.98,
-      telecomHeatKw:  14.98,
+      telecomHeatKBtuH: 51.11,
     },
 
     // CWN903  SB  Arafat  SEC=100A  backupGen=45KVA@8833h≈1yr  AC1+AC2
@@ -582,7 +582,7 @@ export function buildRealSites(): SiteConfig[] {
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
       telecomPowerKw: 13.2,
-      telecomHeatKw:  13.2,
+      telecomHeatKBtuH: 45.04,
     },
   ];
 }

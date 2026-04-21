@@ -40,10 +40,10 @@ export interface SiteConfig {
   backupGeneratorAge?: number;
 
   // Telecom loads
-  telecomPowerKw: number;  // Total telecom KW — used for ALL power margin formulas
-  telecomHeatKw: number;   // Indoor/cabinet KW — drives AC heat load
-                           //   Shelter sites : indoor equipment only
-                           //   Outdoor cabinet: = telecomPowerKw (all heat inside cabinet)
+  telecomPowerKw: number;     // Total telecom KW — used for ALL power margin formulas
+  telecomHeatKBtuH: number;   // Heat dissipation inside cooled space (KBtu/h) — drives AC heat load
+                              //   Shelter sites : indoor equipment only
+                              //   Outdoor cabinet: = telecomPowerKw × 3.412 (all heat inside cabinet)
 
   // Cooling
   ac1CapacityBtu: number;
@@ -166,7 +166,7 @@ export function analyzeScenarios(site: SiteConfig): ScenarioResult[] {
   );
 
   const telecomPwKw  = site.telecomPowerKw;
-  const telecomHeatBtu = site.telecomHeatKw * BTU_PER_KW;
+  const telecomHeatBtu = site.telecomHeatKBtuH * 1000;   // KBtu/h → Btu/h
 
   const isSB = site.powerConfig === "commercial_with_backup";
 

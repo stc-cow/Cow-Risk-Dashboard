@@ -37,7 +37,7 @@ export function SiteDetailPanel({ analysis, onClose }: SiteDetailPanelProps) {
         <div><span className="text-muted-foreground">AC2:</span> <span className="font-semibold">{site.ac2CapacityBtu ? `${(site.ac2CapacityBtu / 1000).toFixed(0)}k BTU/h` : "—"}</span></div>
         <div><span className="text-muted-foreground">Rectifier:</span> <span className="font-semibold">{site.rectifierCapacityKw} kW</span></div>
         <div><span className="text-muted-foreground">Telecom Load:</span> <span className="font-semibold">{site.telecomPowerKw.toFixed(1)} KW</span></div>
-        <div><span className="text-muted-foreground">Shelter Heat Load:</span> <span className="font-semibold">{site.telecomHeatKw.toFixed(1)} KW</span></div>
+        <div><span className="text-muted-foreground">Shelter Heat Load:</span> <span className="font-semibold">{site.telecomHeatKBtuH.toFixed(2)} KBtu/h</span></div>
       </div>
 
       <div className="px-4 py-2 border-b border-border">
