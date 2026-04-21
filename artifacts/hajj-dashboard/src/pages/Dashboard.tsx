@@ -299,7 +299,7 @@ export default function Dashboard() {
       </main>
 
       <footer className="border-t border-border bg-muted/30 py-3 px-4 text-center text-xs text-muted-foreground">
-        Hajj 1447 · stc Telecom COW Power & Cooling Risk Dashboard · Nokia Infrastructure · 94 Sites · 46°C Extreme Conditions Analysis
+        Hajj 1447 · stc Telecom COW Power & Cooling Risk Dashboard · Nokia Infrastructure · {analyses.length} Sites · 46°C Extreme Conditions Analysis
       </footer>
     </div>
   );

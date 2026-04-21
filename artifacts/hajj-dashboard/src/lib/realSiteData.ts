@@ -1,143 +1,549 @@
 import type { SiteConfig } from "./calculations";
 
-// Real Hajj 1447 COW site list with actual GPS coordinates
-const RAW_SITES: Array<{ id: string; area: string; lat: number | null; lng: number | null }> = [
-  { id: "CWN955", area: "Muzdalifah",     lat: 21.389818,   lng: 39.897434  },
-  { id: "CWN996", area: "Arafat",         lat: 21.374231,   lng: 39.980616  },
-  { id: "CWN092", area: "Arafat",         lat: 21.333244,   lng: 39.971526  },
-  { id: "CWN099", area: "Muzdalifah",     lat: 21.369688,   lng: 39.901264  },
-  { id: "CWN208", area: "Muzdalifah",     lat: 21.400017,   lng: 39.91508   },
-  { id: "CWN022", area: "Arafat",         lat: 21.337105,   lng: 39.989527  },
-  { id: "CWN213", area: "Muzdalifah",     lat: 21.3645,     lng: 39.9082    },
-  { id: "CWN970", area: "Mina",           lat: 21.409075,   lng: 39.905872  },
-  { id: "CWN062", area: "Muzdalifah",     lat: 21.3818,     lng: 39.89885   },
-  { id: "CWN080", area: "Arafat",         lat: 21.378152,   lng: 39.990098  },
-  { id: "CWN907", area: "Muzdalifah",     lat: 21.4011089,  lng: 39.9086724 },
-  { id: "CWN960", area: "Arafat",         lat: 21.347135,   lng: 39.992573  },
-  { id: "CWN101", area: "Muzdalifah",     lat: 21.388356,   lng: 39.927744  },
-  { id: "CWN915", area: "Muzdalifah",     lat: 21.383061,   lng: 39.925555  },
-  { id: "CWN984", area: "Arafat",         lat: 21.348754,   lng: 39.995701  },
-  { id: "CWN997", area: "Muzdalifah",     lat: 21.38314,    lng: 39.904478  },
-  { id: "CWN076", area: "Arafat",         lat: 21.3692,     lng: 39.977127  },
-  { id: "CWH318", area: "Muzdalifah",     lat: 21.3813332,  lng: 39.9025838 },
-  { id: "CWN922", area: "Muzdalifah",     lat: 21.404058,   lng: 39.916064  },
-  { id: "CWN073", area: "Arafat",         lat: 21.3738433,  lng: 39.9865483 },
-  { id: "CWN038", area: "Arafat",         lat: 21.328514,   lng: 39.961343  },
-  { id: "CWN300", area: "Muzdalifah",     lat: 21.386604,   lng: 39.897081  },
-  { id: "CWN923", area: "Arafat",         lat: 21.361257,   lng: 39.973944  },
-  { id: "CWN959", area: "Mina",           lat: 21.417782,   lng: 39.910356  },
-  { id: "CWN992", area: "Muzdalifah",     lat: 21.389249,   lng: 39.906895  },
-  { id: "CWN072", area: "Arafat",         lat: 21.34196,    lng: 39.97602   },
-  { id: "CWN206", area: "Muzdalifah",     lat: 21.390274,   lng: 39.928265  },
-  { id: "CWN205", area: "Muzdalifah",     lat: 21.396241,   lng: 39.914628  },
-  { id: "CWN901", area: "Arafat",         lat: 21.372652,   lng: 39.989533  },
-  { id: "CWN961", area: "Mina",           lat: 21.398381,   lng: 39.89731   },
-  { id: "CWN967", area: "Makkah Remote",  lat: 21.631015,   lng: 40.427249  },
-  { id: "CWN998", area: "Makkah Remote",  lat: 21.647214,   lng: 40.389186  },
-  { id: "CWN020", area: "Arafat",         lat: 21.35047,    lng: 39.96813   },
-  { id: "CWN036", area: "Arafat",         lat: 21.37989,    lng: 39.944133  },
-  { id: "CWN085", area: "Arafat",         lat: 21.36681,    lng: 39.96439   },
-  { id: "CWN084", area: "Arafat",         lat: 21.342528,   lng: 39.962167  },
-  { id: "CWN087", area: "Arafat",         lat: 21.35694,    lng: 39.97782   },
-  { id: "CWN075", area: "Arafat",         lat: 21.346996,   lng: 39.957369  },
-  { id: "CWN002", area: "Mina",           lat: 21.42045,    lng: 39.87142   },
-  { id: "CWN004", area: "Muzdalifah",     lat: 21.387678,   lng: 39.896187  },
-  { id: "CWN015", area: "Arafat",         lat: 21.377645,   lng: 39.986816  },
-  { id: "CWN068", area: "Muzdalifah",     lat: 21.39217,    lng: 39.91244   },
-  { id: "CWN074", area: "Muzdalifah",     lat: 21.388397,   lng: 39.90236   },
-  { id: "CWN078", area: "Arafat",         lat: 21.34051,    lng: 39.99548   },
-  { id: "CWN083", area: "Arafat",         lat: 21.331372,   lng: 39.965547  },
-  { id: "CWN089", area: "Muzdalifah",     lat: 21.384184,   lng: 39.910808  },
-  { id: "CWN201", area: "Mina",           lat: 21.4206848,  lng: 39.8809927 },
-  { id: "CWN202", area: "Muzdalifah",     lat: 21.397049,   lng: 39.903512  },
-  { id: "CWN203", area: "Arafat",         lat: 21.354658,   lng: 39.986218  },
-  { id: "CWN212", area: "Arafat",         lat: 21.366124,   lng: 39.984126  },
-  { id: "CWN214", area: "Muzdalifah",     lat: 21.39194,    lng: 39.903738  },
-  { id: "CWN301", area: "Muzdalifah",     lat: 21.386942,   lng: 39.89955   },
-  { id: "CWN777", area: "Mina",           lat: 21.395908,   lng: 39.899677  },
-  { id: "CWN903", area: "Arafat",         lat: 21.359944,   lng: 39.947977  },
-  { id: "CWN906", area: "Arafat",         lat: 21.37625,    lng: 39.98233   },
-  { id: "CWN914", area: "Arafat",         lat: 21.365421,   lng: 39.971661  },
-  { id: "CWN951", area: "Arafat",         lat: 21.36258,    lng: 39.96906   },
-  { id: "CWN953", area: "Mina",           lat: 21.418835,   lng: 39.892713  },
-  { id: "CWN956", area: "Arafat",         lat: 21.3704107,  lng: 39.9854222 },
-  { id: "CWN976", area: "Mina",           lat: 21.40275,    lng: 39.89751   },
-  { id: "CWN978", area: "Mina",           lat: 21.421776,   lng: 39.891894  },
-  { id: "CWN980", area: "Arafat",         lat: 21.371837,   lng: 39.985979  },
-  { id: "CWN991", area: "Arafat",         lat: 21.37224,    lng: 39.93826   },
-  { id: "CWN994", area: "Mina",           lat: 21.42346,    lng: 39.89534   },
-  { id: "CWN050", area: "Arafat",         lat: 21.38536,    lng: 40.00519   },
-  { id: "CWN079", area: "Muzdalifah",     lat: 21.3615,     lng: 39.9179    },
-  { id: "CWN093", area: "Arafat",         lat: 21.3568,     lng: 39.93535   },
-  { id: "CWN001", area: "Arafat",         lat: 21.33728,    lng: 39.957769  },
-  { id: "CWN108", area: "Arafat",         lat: 21.34916,    lng: 39.98367   },
-  { id: "CWN008", area: "Arafat",         lat: 21.3513851,  lng: 39.9812917 },
-  { id: "CWN032", area: "Muzdalifah",     lat: 21.3599709,  lng: 39.9122733 },
-  { id: "CWN972", area: "Muzdalifah",     lat: 21.360682,   lng: 39.916155  },
-  { id: "CWN211", area: "Muzdalifah",     lat: 21.386633,   lng: 39.911309  },
-  { id: "CWN104", area: "Muzdalifah",     lat: 21.376644,   lng: 39.918992  },
-  { id: "CWN021", area: "Muzdalifah",     lat: 21.3934192,  lng: 39.9166466 },
-  { id: "CWN066", area: "Muzdalifah",     lat: 21.3905912,  lng: 39.9199632 },
-  { id: "CWN105", area: "Arafat",         lat: null,        lng: null       },
-  { id: "CWN081", area: "Makkah Remote",  lat: 20.99354,    lng: 39.58815   },
-  { id: "CWN102", area: "Arafat",         lat: null,        lng: null       },
-];
-
-function rng(seed: number, min: number, max: number): number {
-  const x = Math.sin(seed * 9301 + 49297) * 233280;
-  const t = x - Math.floor(x);
-  return min + t * (max - min);
-}
-
-function pick<T>(arr: T[], seed: number): T {
-  const x = Math.sin(seed * 7.7) * 10000;
-  const t = x - Math.floor(x);
-  return arr[Math.floor(t * arr.length)];
-}
+// ─── Real Hajj 1447 COW Data ───────────────────────────────────────────────
+// Power Source codes:
+//   SG = Single Generator (prime power only)
+//   SB = SEC (grid) + Backup Generator
+//   generatorKva for SB = SEC_Amps × 0.5  (gives correct calcGeneratorNetPower output)
+//   generatorAge for SB = 0 (grid never degrades)
+// Battery capacity = Ah_per_string × number_of_strings
+// telecomLoadAmps = telecomLoadKw × 1000 / 48
+// ───────────────────────────────────────────────────────────────────────────
 
 export function buildRealSites(): SiteConfig[] {
-  return RAW_SITES.filter(r => r.lat !== null && r.lng !== null).map((r, i) => {
-    const seed = i * 17 + r.id.charCodeAt(3);
-    const siteType: "shelter" | "outdoor_cabinet" = rng(seed, 0, 1) > 0.45 ? "shelter" : "outdoor_cabinet";
-    const powerConfig: "single_generator" | "commercial_with_backup" =
-      rng(seed + 1, 0, 1) > 0.4 ? "single_generator" : "commercial_with_backup";
-    const batteryType: "lead_acid" | "lithium" = rng(seed + 2, 0, 1) > 0.5 ? "lead_acid" : "lithium";
+  return [
+    // ── SHELTER SITES ──────────────────────────────────────────────────────
 
-    const site: SiteConfig = {
-      id: r.id,
-      name: `${r.area} — ${r.id}`,
-      location: r.area,
-      lat: r.lat!,
-      lng: r.lng!,
-      siteType,
-      powerConfig,
-      generatorKva: pick([30, 50, 75, 100, 125], seed + 3),
-      generatorAge: Math.floor(rng(seed + 4, 0, 8)),
-      telecomLoadAmps: Math.floor(rng(seed + 5, 30, 120)),
-      ac1CapacityBtu: pick([24000, 36000, 48000, 60000, 72000], seed + 6),
-      ac1Age: Math.floor(rng(seed + 7, 0, 4)),
-      batteryCapacityAh: pick([150, 200, 300, 500, 700], seed + 8),
-      batteryType,
-      batteryAge: Math.floor(rng(seed + 9, 0, 5)),
-      rectifierCapacityKw: pick([5, 10, 15, 20, 25], seed + 10),
-    };
+    // CWN105  SB  Shelter  Arafat  SEC=150A  backupGen=30KVA@0h
+    {
+      id: "CWN105", name: "Arafat — CWN105", location: "Arafat",
+      lat: 21.35622, lng: 39.98477,
+      siteType: "shelter", powerConfig: "commercial_with_backup",
+      generatorKva: 75,       // SEC 150A × 0.5
+      generatorAge: 0,        // grid
+      backupGeneratorKva: 30, backupGeneratorAge: 0,
+      rectifierCapacityKw: 18,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 600,  // 200Ah × 3 strings
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 175,    // 8.4KW × 1000/48
+    },
 
-    if (siteType === "shelter") {
-      site.ac2CapacityBtu = pick([24000, 36000, 48000], seed + 11);
-      site.ac2Age = Math.floor(rng(seed + 12, 0, 4));
-    }
+    // CWN923  SG  Shelter  Arafat  gen=30KVA@3110h≈0yr
+    {
+      id: "CWN923", name: "Arafat — CWN923", location: "Arafat",
+      lat: 21.361257, lng: 39.973944,
+      siteType: "shelter", powerConfig: "single_generator",
+      generatorKva: 30, generatorAge: 0,
+      rectifierCapacityKw: 19.2,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 950,  // 190Ah × 5 strings
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 219,    // 10.5KW × 1000/48
+    },
 
-    if (powerConfig === "commercial_with_backup") {
-      site.backupGeneratorKva = pick([30, 50, 75], seed + 13);
-      site.backupGeneratorAge = Math.floor(rng(seed + 14, 0, 5));
-    }
+    // CWN991  SB  Shelter  Arafat  SEC=100A  backupGen=30KVA@15578h≈1yr
+    {
+      id: "CWN991", name: "Arafat — CWN991", location: "Arafat",
+      lat: 21.37224, lng: 39.93826,
+      siteType: "shelter", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 30, backupGeneratorAge: 1,
+      rectifierCapacityKw: 19.2,
+      ac1CapacityBtu: 48000, ac1Age: 0,
+      ac2CapacityBtu: 48000, ac2Age: 0,
+      batteryCapacityAh: 800,  // 200Ah × 4 strings
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 175,
+    },
 
-    // Mark as placeholder safe until real data is uploaded
-    site.placeholderSafe = true;
+    // CWN092  SG  Shelter  Arafat  gen=30KVA@25098h≈2yr  telecom=0
+    {
+      id: "CWN092", name: "Arafat — CWN092", location: "Arafat",
+      lat: 21.333244, lng: 39.971526,
+      siteType: "shelter", powerConfig: "single_generator",
+      generatorKva: 30, generatorAge: 2,
+      rectifierCapacityKw: 16,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 400,  // 200Ah × 2 strings
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 0,
+    },
 
-    return site;
-  });
+    // CWN076  SG  Shelter  Arafat  gen=30KVA@18324h≈2yr
+    {
+      id: "CWN076", name: "Arafat — CWN076", location: "Arafat",
+      lat: 21.3692, lng: 39.977127,
+      siteType: "shelter", powerConfig: "single_generator",
+      generatorKva: 30, generatorAge: 2,
+      rectifierCapacityKw: 15,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 1400, // 200Ah × 7 strings
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 175,
+    },
+
+    // CWN108  SB  Shelter  Arafat  SEC=100A  backupGen=30KVA@42885h≈4yr
+    {
+      id: "CWN108", name: "Arafat — CWN108", location: "Arafat",
+      lat: 21.34916, lng: 39.98367,
+      siteType: "shelter", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 30, backupGeneratorAge: 4,
+      rectifierCapacityKw: 18,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 600,  // 200Ah × 3 strings
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 175,
+    },
+
+    // CWN087  SB  Shelter  Arafat  SEC=70A  backupGen=35KVA@0h
+    {
+      id: "CWN087", name: "Arafat — CWN087", location: "Arafat",
+      lat: 21.35694, lng: 39.97782,
+      siteType: "shelter", powerConfig: "commercial_with_backup",
+      generatorKva: 35, generatorAge: 0,
+      backupGeneratorKva: 35, backupGeneratorAge: 0,
+      rectifierCapacityKw: 21,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 760,  // 190Ah × 4 strings
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 175,
+    },
+
+    // CWN075  SB  Shelter  Arafat  SEC=100A  backupGen=35KVA@1798h≈0yr
+    {
+      id: "CWN075", name: "Arafat — CWN075", location: "Arafat",
+      lat: 21.346996, lng: 39.957369,
+      siteType: "shelter", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 35, backupGeneratorAge: 0,
+      rectifierCapacityKw: 21.6,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 175,
+    },
+
+    // CWN072  SB  Shelter  Arafat  SEC=100A  backupGen=25KVA@0h
+    {
+      id: "CWN072", name: "Arafat — CWN072", location: "Arafat",
+      lat: 21.34196, lng: 39.97602,
+      siteType: "shelter", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 25, backupGeneratorAge: 0,
+      rectifierCapacityKw: 21.6,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 1475, // 295Ah × 5 strings
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 175,
+    },
+
+    // CWN078  SB  Shelter  Arafat  SEC=100A  backupGen=35KVA@0h
+    {
+      id: "CWN078", name: "Arafat — CWN078", location: "Arafat",
+      lat: 21.34051, lng: 39.99548,
+      siteType: "shelter", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 35, backupGeneratorAge: 0,
+      rectifierCapacityKw: 16.2,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 175,
+    },
+
+    // CWN080  SG  Shelter  Arafat  gen=35KVA@22058h≈2yr  telecom=0
+    {
+      id: "CWN080", name: "Arafat — CWN080", location: "Arafat",
+      lat: 21.378152, lng: 39.990098,
+      siteType: "shelter", powerConfig: "single_generator",
+      generatorKva: 35, generatorAge: 2,
+      rectifierCapacityKw: 21.6,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 760,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 0,
+    },
+
+    // CWN084  SB  Shelter  Arafat  SEC=100A  backupGen=35KVA@0h
+    {
+      id: "CWN084", name: "Arafat — CWN084", location: "Arafat",
+      lat: 21.342528, lng: 39.962167,
+      siteType: "shelter", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 35, backupGeneratorAge: 0,
+      rectifierCapacityKw: 18.9,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 219,    // 10.5KW
+    },
+
+    // CWN085  SB  Shelter  Arafat  SEC=100A  backupGen=35KVA@0h
+    {
+      id: "CWN085", name: "Arafat — CWN085", location: "Arafat",
+      lat: 21.36681, lng: 39.96439,
+      siteType: "shelter", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 35, backupGeneratorAge: 0,
+      rectifierCapacityKw: 18,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 760,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 175,
+    },
+
+    // CWN073  SB  Shelter  Arafat  SEC=100A  backupGen=45KVA@0h
+    {
+      id: "CWN073", name: "Arafat — CWN073", location: "Arafat",
+      lat: 21.3738433, lng: 39.9865483,
+      siteType: "shelter", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 45, backupGeneratorAge: 0,
+      rectifierCapacityKw: 21.6,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 248,    // 11.9KW
+    },
+
+    // CWN093  SB  Shelter  Arafat  SEC=200A  backupGen=45KVA@31766h≈3yr
+    {
+      id: "CWN093", name: "Arafat — CWN093", location: "Arafat",
+      lat: 21.3568, lng: 39.93535,
+      siteType: "shelter", powerConfig: "commercial_with_backup",
+      generatorKva: 100, generatorAge: 0,
+      backupGeneratorKva: 45, backupGeneratorAge: 3,
+      rectifierCapacityKw: 21,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 1600, // 200Ah × 8 strings
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 219,
+    },
+
+    // CWN038  SG  Shelter  Arafat  gen=30KVA@1525h≈0yr  telecom=0
+    {
+      id: "CWN038", name: "Arafat — CWN038", location: "Arafat",
+      lat: 21.328514, lng: 39.961343,
+      siteType: "shelter", powerConfig: "single_generator",
+      generatorKva: 30, generatorAge: 0,
+      rectifierCapacityKw: 12.8,
+      ac1CapacityBtu: 48000, ac1Age: 0,
+      ac2CapacityBtu: 48000, ac2Age: 0,
+      batteryCapacityAh: 1400,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 0,
+    },
+
+    // CWN083  SG  Shelter  Arafat  gen=35KVA@6125h≈0yr
+    {
+      id: "CWN083", name: "Arafat — CWN083", location: "Arafat",
+      lat: 21.331372, lng: 39.965547,
+      siteType: "shelter", powerConfig: "single_generator",
+      generatorKva: 35, generatorAge: 0,
+      rectifierCapacityKw: 18,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 600,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 175,
+    },
+
+    // CWN908  PowerSource=0  Shelter  Arafat  all zeros (pending data)
+    {
+      id: "CWN908", name: "Arafat — CWN908", location: "Arafat",
+      lat: 21.365285, lng: 39.95051,
+      siteType: "shelter", powerConfig: "single_generator",
+      generatorKva: 0, generatorAge: 0,
+      rectifierCapacityKw: 0,
+      ac1CapacityBtu: 0, ac1Age: 0,
+      batteryCapacityAh: 0,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 0,
+      placeholderSafe: true,   // no data yet
+    },
+
+    // CWN102  SB  Shelter  Arafat  SEC=100A  backupGen=45KVA@11794h≈1yr
+    {
+      id: "CWN102", name: "Arafat — CWN102", location: "Arafat",
+      lat: 21.35901, lng: 39.95689,
+      siteType: "shelter", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 45, backupGeneratorAge: 1,
+      rectifierCapacityKw: 19.2,
+      ac1CapacityBtu: 36000, ac1Age: 0,
+      ac2CapacityBtu: 36000, ac2Age: 0,
+      batteryCapacityAh: 1600, // 200Ah × 8 strings
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 219,
+    },
+
+    // ── OUTDOOR CABINET SITES ──────────────────────────────────────────────
+
+    // CWN206  SG  Outdoor  Muzdalifah  gen=30KVA@32553h≈3yr  telecom=0
+    {
+      id: "CWN206", name: "Muzdalifah — CWN206", location: "Muzdalifah",
+      lat: 21.390274, lng: 39.928265,
+      siteType: "outdoor_cabinet", powerConfig: "single_generator",
+      generatorKva: 30, generatorAge: 3,
+      rectifierCapacityKw: 24,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 0,
+    },
+
+    // CWN956  SB  Outdoor  Arafat  SEC=100A  backupGen=30KVA@0h
+    {
+      id: "CWN956", name: "Arafat — CWN956", location: "Arafat",
+      lat: 21.3704107, lng: 39.9854222,
+      siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 30, backupGeneratorAge: 0,
+      rectifierCapacityKw: 15,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 220,    // 10.56KW
+    },
+
+    // CWN980  SB  Outdoor  Arafat  SEC=100A  backupGen=30KVA@0h
+    {
+      id: "CWN980", name: "Arafat — CWN980", location: "Arafat",
+      lat: 21.371837, lng: 39.985979,
+      siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 30, backupGeneratorAge: 0,
+      rectifierCapacityKw: 18,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 220,
+    },
+
+    // CWN951  SB  Outdoor  Arafat  SEC=100A  backupGen=30KVA@0h
+    {
+      id: "CWN951", name: "Arafat — CWN951", location: "Arafat",
+      lat: 21.36258, lng: 39.96906,
+      siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 30, backupGeneratorAge: 0,
+      rectifierCapacityKw: 15,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 220,
+    },
+
+    // CWN020  SB  Outdoor  Arafat  SEC=100A  backupGen=35KVA@2350h≈0yr
+    {
+      id: "CWN020", name: "Arafat — CWN020", location: "Arafat",
+      lat: 21.35047, lng: 39.96813,
+      siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 35, backupGeneratorAge: 0,
+      rectifierCapacityKw: 24,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 275,    // 13.2KW
+    },
+
+    // CWN901  SG  Outdoor  Arafat  gen=30KVA@12495h≈1yr  telecom=0
+    {
+      id: "CWN901", name: "Arafat — CWN901", location: "Arafat",
+      lat: 21.372652, lng: 39.989533,
+      siteType: "outdoor_cabinet", powerConfig: "single_generator",
+      generatorKva: 30, generatorAge: 1,
+      rectifierCapacityKw: 18,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 0,
+    },
+
+    // CWN203  SB  Outdoor  Arafat  SEC=100A  backupGen=35KVA@0h
+    {
+      id: "CWN203", name: "Arafat — CWN203", location: "Arafat",
+      lat: 21.354658, lng: 39.986218,
+      siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 35, backupGeneratorAge: 0,
+      rectifierCapacityKw: 24,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 312,    // 14.96KW
+    },
+
+    // CWN914  SB  Outdoor  Arafat  SEC=100A  backupGen=30KVA@0h
+    {
+      id: "CWN914", name: "Arafat — CWN914", location: "Arafat",
+      lat: 21.365421, lng: 39.971661,
+      siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 30, backupGeneratorAge: 0,
+      rectifierCapacityKw: 18,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 220,
+    },
+
+    // CWN015  SB  Outdoor  Arafat  SEC=100A  backupGen=30KVA@0h
+    {
+      id: "CWN015", name: "Arafat — CWN015", location: "Arafat",
+      lat: 21.377645, lng: 39.986816,
+      siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 30, backupGeneratorAge: 0,
+      rectifierCapacityKw: 18,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 220,
+    },
+
+    // CWN212  SB  Outdoor  Arafat  SEC=100A  backupGen=35KVA@0h
+    {
+      id: "CWN212", name: "Arafat — CWN212", location: "Arafat",
+      lat: 21.366124, lng: 39.984126,
+      siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 35, backupGeneratorAge: 0,
+      rectifierCapacityKw: 21,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 275,
+    },
+
+    // CWN992  SB  Outdoor  Muzdalifah  SEC=60A  backupGen=30KVA@0h
+    {
+      id: "CWN992", name: "Muzdalifah — CWN992", location: "Muzdalifah",
+      lat: 21.389249, lng: 39.906895,
+      siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
+      generatorKva: 30, generatorAge: 0,  // 60A × 0.5
+      backupGeneratorKva: 30, backupGeneratorAge: 0,
+      rectifierCapacityKw: 15,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 760,  // 190Ah × 4 strings
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 220,
+    },
+
+    // CWN205  SG  Outdoor  Muzdalifah  gen=30KVA@3492h≈0yr  telecom=0
+    {
+      id: "CWN205", name: "Muzdalifah — CWN205", location: "Muzdalifah",
+      lat: 21.396241, lng: 39.914628,
+      siteType: "outdoor_cabinet", powerConfig: "single_generator",
+      generatorKva: 30, generatorAge: 0,
+      rectifierCapacityKw: 24,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 0,
+    },
+
+    // CWN960  SB  Outdoor  Arafat  SEC=100A  backupGen=45KVA@918h≈0yr  AC1+AC2
+    {
+      id: "CWN960", name: "Arafat — CWN960", location: "Arafat",
+      lat: 21.347135, lng: 39.992573,
+      siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 45, backupGeneratorAge: 0,
+      rectifierCapacityKw: 21,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      ac2CapacityBtu: 10200, ac2Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 220,
+    },
+
+    // CWN984  SG  Outdoor  Arafat  gen=30KVA@9331h≈1yr  AC1+AC2
+    {
+      id: "CWN984", name: "Arafat — CWN984", location: "Arafat",
+      lat: 21.348754, lng: 39.995701,
+      siteType: "outdoor_cabinet", powerConfig: "single_generator",
+      generatorKva: 30, generatorAge: 1,
+      rectifierCapacityKw: 18,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      ac2CapacityBtu: 10200, ac2Age: 0,
+      batteryCapacityAh: 760,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 220,
+    },
+
+    // CWN996  SG  Outdoor  Arafat  gen=30KVA@19356h≈2yr  telecom=0
+    {
+      id: "CWN996", name: "Arafat — CWN996", location: "Arafat",
+      lat: 21.374231, lng: 39.980616,
+      siteType: "outdoor_cabinet", powerConfig: "single_generator",
+      generatorKva: 30, generatorAge: 2,
+      rectifierCapacityKw: 15,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 760,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 0,
+    },
+
+    // CWN906  SB  Outdoor  Arafat  SEC=100A  backupGen=30KVA@0h
+    {
+      id: "CWN906", name: "Arafat — CWN906", location: "Arafat",
+      lat: 21.37625, lng: 39.98233,
+      siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 30, backupGeneratorAge: 0,
+      rectifierCapacityKw: 18,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      batteryCapacityAh: 760,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 275,    // 13.2KW
+    },
+
+    // CWN214  SB  Outdoor  Muzdalifah  SEC=100A  backupGen=35KVA@5091h≈0yr  AC1+AC2
+    {
+      id: "CWN214", name: "Muzdalifah — CWN214", location: "Muzdalifah",
+      lat: 21.39194, lng: 39.903738,
+      siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 35, backupGeneratorAge: 0,
+      rectifierCapacityKw: 21,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      ac2CapacityBtu: 10200, ac2Age: 0,
+      batteryCapacityAh: 760,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 312,    // 14.96KW
+    },
+
+    // CWN903  SB  Outdoor  Arafat  SEC=100A  backupGen=45KVA@8833h≈1yr  AC1+AC2
+    {
+      id: "CWN903", name: "Arafat — CWN903", location: "Arafat",
+      lat: 21.359944, lng: 39.947977,
+      siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
+      generatorKva: 50, generatorAge: 0,
+      backupGeneratorKva: 45, backupGeneratorAge: 1,
+      rectifierCapacityKw: 18,
+      ac1CapacityBtu: 10200, ac1Age: 0,
+      ac2CapacityBtu: 10200, ac2Age: 0,
+      batteryCapacityAh: 800,
+      batteryType: "lead_acid", batteryAge: 0,
+      telecomLoadAmps: 275,
+    },
+  ];
 }
-
-// Sites without coordinates (kept for reference)
-export const SITES_WITHOUT_COORDS = RAW_SITES.filter(r => r.lat === null);
