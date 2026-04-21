@@ -38,7 +38,7 @@ function HeatmapLayer({ analyses }: HeatmapLayerProps) {
       map.removeLayer(layerRef.current);
     }
 
-    const riskWeight = { safe: 0.2, warning: 0.6, critical: 1.0 };
+    const riskWeight = { safe: 0.3, warning: 0.7, critical: 1.0 };
 
     const points = analyses.map(a => [
       a.site.lat,
@@ -48,15 +48,17 @@ function HeatmapLayer({ analyses }: HeatmapLayerProps) {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const heat = (L as any).heatLayer(points, {
-      radius: 30,
-      blur: 25,
-      maxZoom: 14,
+      radius: 60,
+      blur: 50,
+      maxZoom: 17,
+      minOpacity: 0.35,
       max: 1.0,
       gradient: {
-        0.0: "#00BFB3",
-        0.4: "#FF9AAD",
-        0.7: "#E8175D",
-        1.0: "#4A0E8F",
+        0.0:  "rgba(0,191,179,0)",
+        0.25: "#00BFB3",
+        0.55: "#FF9AAD",
+        0.80: "#E8175D",
+        1.0:  "#4A0E8F",
       },
     });
 
