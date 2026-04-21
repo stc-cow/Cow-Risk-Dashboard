@@ -9,8 +9,9 @@ import { SiteDetailPanel } from "../components/SiteDetailPanel";
 import { SiteTable } from "../components/SiteTable";
 import { TechnicianRecommendation } from "../components/TechnicianRecommendation";
 import { RiskDistributionPie, RiskTypeBreakdown, LocationRiskChart } from "../components/RiskCharts";
+import { ScenarioMatrix } from "../components/ScenarioMatrix";
 
-type Tab = "overview" | "map" | "sites" | "technicians";
+type Tab = "overview" | "scenarios" | "map" | "sites" | "technicians";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
@@ -34,6 +35,7 @@ export default function Dashboard() {
 
   const tabs: Array<{ key: Tab; label: string; icon: string }> = [
     { key: "overview", label: "Overview", icon: "📊" },
+    { key: "scenarios", label: "Scenarios", icon: "🔬" },
     { key: "map", label: "Geographic Map", icon: "🗺️" },
     { key: "sites", label: "Site List", icon: "📋" },
     { key: "technicians", label: "Field Ops", icon: "👷" },
@@ -161,6 +163,12 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === "scenarios" && (
+          <div className="space-y-4">
+            <ScenarioMatrix analyses={analyses} />
           </div>
         )}
 
