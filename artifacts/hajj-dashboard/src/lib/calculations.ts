@@ -260,8 +260,11 @@ export function analyzeScenarios(site: SiteConfig): ScenarioResult[] {
       isOutage ? "critical" : riskFromMargin(powerMargin, 0, 3);
     const rectifierRisk: "safe" | "warning" | "critical" =
       isOutage ? "critical" : riskFromMargin(rectifierMargin, 0, 2);
+    // Outdoor cabinet cooling risk hard-coded safe until new formula is provided
     const coolingRisk: "safe" | "warning" | "critical" =
-      isOutage ? "critical" : riskFromMargin(coolingMargin, 0, 5000);
+      site.siteType === "outdoor_cabinet" ? "safe"
+      : isOutage ? "critical"
+      : riskFromMargin(coolingMargin, 0, 5000);
 
     const riskMap = { safe: 0, warning: 1, critical: 2 };
     const riskScore =
