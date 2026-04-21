@@ -1,8 +1,10 @@
+import type { ReactNode } from "react";
+
 interface MetricCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
-  icon?: string;
+  icon?: ReactNode;
   color?: "green" | "yellow" | "red" | "blue" | "default";
   large?: boolean;
 }
@@ -21,7 +23,7 @@ export function MetricCard({ title, value, subtitle, icon, color = "default", la
       <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground font-medium">{title}</span>
         {icon && (
-          <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${colorMap[color]} flex items-center justify-center text-white text-sm`}>
+          <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${colorMap[color]} flex items-center justify-center text-white`}>
             {icon}
           </div>
         )}

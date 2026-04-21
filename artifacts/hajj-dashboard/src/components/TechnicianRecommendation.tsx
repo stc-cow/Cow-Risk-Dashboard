@@ -1,3 +1,4 @@
+import { HardHat } from "lucide-react";
 import type { SiteAnalysis } from "../lib/calculations";
 
 interface TechnicianRecommendationProps {
@@ -21,7 +22,9 @@ export function TechnicianRecommendation({ analyses }: TechnicianRecommendationP
   return (
     <div className="bg-card border border-card-border rounded-xl shadow-sm p-4 space-y-4">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm">👷</div>
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white">
+          <HardHat size={16} />
+        </div>
         <div>
           <div className="font-semibold text-sm">Technician Deployment Plan</div>
           <div className="text-xs text-muted-foreground">Based on risk classification</div>

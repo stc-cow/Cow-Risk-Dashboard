@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, type ReactNode } from "react";
 import acesLogo from "@assets/ChatGPT_Image_Oct_14,_2025,_10_29_41_PM_1776566555155.png";
 import stcLogo from "@assets/7010.SR.D-9f4e531b_(1)_1776566577166.png";
+import { LayoutDashboard, FlaskConical, Map, ClipboardList, HardHat, Radio, CheckCircle2, AlertCircle, Users, Thermometer, Settings } from "lucide-react";
 import { analyzeSite } from "../lib/calculations";
 import { ALL_SITES } from "../lib/siteData";
 import { MetricCard } from "../components/MetricCard";
@@ -31,12 +32,12 @@ export default function Dashboard() {
 
   const totalTechs = Math.ceil(riskCount / 3);
 
-  const tabs: Array<{ key: Tab; label: string; icon: string }> = [
-    { key: "overview", label: "Overview", icon: "📊" },
-    { key: "scenarios", label: "Scenarios", icon: "🔬" },
-    { key: "map", label: "Heat Map", icon: "🗺️" },
-    { key: "sites", label: "Site List", icon: "📋" },
-    { key: "technicians", label: "Field Ops", icon: "👷" },
+  const tabs: Array<{ key: Tab; label: string; icon: ReactNode }> = [
+    { key: "overview",     label: "Overview",   icon: <LayoutDashboard size={14} /> },
+    { key: "scenarios",    label: "Scenarios",  icon: <FlaskConical    size={14} /> },
+    { key: "map",          label: "Heat Map",   icon: <Map             size={14} /> },
+    { key: "sites",        label: "Site List",  icon: <ClipboardList   size={14} /> },
+    { key: "technicians",  label: "Field Ops",  icon: <HardHat         size={14} /> },
   ];
 
   return (
@@ -103,11 +104,11 @@ export default function Dashboard() {
         {activeTab === "overview" && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-              <MetricCard title="Total COW Sites" value={analyses.length} icon="📡" color="blue" subtitle="Hajj 1447 deployment" />
-              <MetricCard title="Safe Sites" value={safeCount} icon="✓" color="green" subtitle={`${((safeCount/analyses.length)*100).toFixed(0)}% of fleet`} />
-              <MetricCard title="Risk Sites" value={riskCount} icon="✗" color="red" subtitle="Requires attention" />
-              <MetricCard title="Field Technicians" value={totalTechs} icon="👷" color="blue" subtitle="Recommended deployment" />
-              <MetricCard title="Operating Temp" value="46°C" icon="🌡" color="red" subtitle="Extreme Hajj conditions" />
+              <MetricCard title="Total COW Sites" value={analyses.length} icon={<Radio size={16} />} color="blue" subtitle="Hajj 1447 deployment" />
+              <MetricCard title="Safe Sites" value={safeCount} icon={<CheckCircle2 size={16} />} color="green" subtitle={`${((safeCount/analyses.length)*100).toFixed(0)}% of fleet`} />
+              <MetricCard title="Risk Sites" value={riskCount} icon={<AlertCircle size={16} />} color="red" subtitle="Requires attention" />
+              <MetricCard title="Field Technicians" value={totalTechs} icon={<Users size={16} />} color="blue" subtitle="Recommended deployment" />
+              <MetricCard title="Operating Temp" value="46°C" icon={<Thermometer size={16} />} color="red" subtitle="Extreme Hajj conditions" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <RiskDistributionPie analyses={analyses} />
@@ -124,7 +125,7 @@ export default function Dashboard() {
 
             <div className="bg-card border border-card-border rounded-xl p-4 text-xs space-y-3">
               <div className="font-semibold text-sm flex items-center gap-2">
-                <span className="w-5 h-5 rounded bg-amber-100 text-amber-700 flex items-center justify-center">⚙</span>
+                <span className="w-5 h-5 rounded bg-amber-100 text-amber-700 flex items-center justify-center"><Settings size={12} /></span>
                 Engineering Assumptions (46°C Extreme Conditions)
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
