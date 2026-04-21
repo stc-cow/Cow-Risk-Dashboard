@@ -44,25 +44,27 @@ function HeatmapLayer({ analyses }: HeatmapLayerProps) {
       .filter(a => a.overallRisk === "risk")
       .map(a => [a.site.lat, a.site.lng, 1.0]) as [number, number, number][];
 
+    // Large radius → 31 safe sites merge into a wide green cloud when zoomed out
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const heatSafe = (L as any).heatLayer(safePoints, {
-      radius: 55, blur: 45, maxZoom: 17, minOpacity: 0.25, max: 1.0,
+      radius: 90, blur: 70, maxZoom: 17, minOpacity: 0.20, max: 1.0,
       gradient: {
         0.0: "rgba(0,150,110,0)",
-        0.3: "#00BFB3",
-        0.7: "#00966E",
+        0.2: "#00BFB3",
+        0.6: "#00966E",
         1.0: "#006644",
       },
     });
 
+    // Small radius → 6 risk sites stay as tight red spots, clearly visible on top
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const heatRisk = (L as any).heatLayer(riskPoints, {
-      radius: 55, blur: 45, maxZoom: 17, minOpacity: 0.40, max: 1.0,
+      radius: 38, blur: 28, maxZoom: 17, minOpacity: 0.50, max: 1.0,
       gradient: {
         0.0: "rgba(232,23,93,0)",
-        0.3: "#FF9AAD",
-        0.7: "#E8175D",
-        1.0: "#9B0033",
+        0.25: "#FF9AAD",
+        0.65: "#E8175D",
+        1.0:  "#9B0033",
       },
     });
 
