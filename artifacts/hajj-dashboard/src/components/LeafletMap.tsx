@@ -36,12 +36,14 @@ function HeatmapLayer({ analyses }: HeatmapLayerProps) {
       map.removeLayer(layerRef.current);
     }
 
-    const riskWeight = { safe: 0.3, risk: 1.0 };
+    // Safe sites = high weight → green glow
+    // Risk sites = low weight  → red glow
+    const safeWeight = { safe: 1.0, risk: 0.08 };
 
     const points = analyses.map(a => [
       a.site.lat,
       a.site.lng,
-      riskWeight[a.overallRisk],
+      safeWeight[a.overallRisk],
     ]) as [number, number, number][];
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -49,14 +51,15 @@ function HeatmapLayer({ analyses }: HeatmapLayerProps) {
       radius: 60,
       blur: 50,
       maxZoom: 17,
-      minOpacity: 0.35,
+      minOpacity: 0.30,
       max: 1.0,
       gradient: {
-        0.0:  "rgba(0,191,179,0)",
-        0.25: "#00BFB3",
-        0.55: "#FF9AAD",
-        0.80: "#E8175D",
-        1.0:  "#4A0E8F",
+        0.0:  "rgba(232,23,93,0)",    // transparent red edge
+        0.12: "#E8175D",               // red — risk / sparse areas
+        0.40: "#FF8C00",               // amber transition
+        0.70: "#7BC800",               // yellow-green
+        0.88: "#00BFB3",               // STC teal
+        1.0:  "#00966E",               // deep green — dense safe clusters
       },
     });
 
