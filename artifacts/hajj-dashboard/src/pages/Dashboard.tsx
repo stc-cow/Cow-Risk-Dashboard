@@ -3,6 +3,7 @@ import acesLogo from "@assets/ChatGPT_Image_Oct_14,_2025,_10_29_41_PM_1776566555
 import stcLogo from "@assets/7010.SR.D-9f4e531b_(1)_1776566577166.png";
 import { analyzeSite } from "../lib/calculations";
 import { ALL_SITES } from "../lib/siteData";
+import { MetricCard } from "../components/MetricCard";
 import { LeafletMap } from "../components/LeafletMap";
 import { SiteDetailPanel } from "../components/SiteDetailPanel";
 import { SiteTable } from "../components/SiteTable";
@@ -95,30 +96,16 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* ── Persistent metric bar — always visible under header ── */}
-      <div className="border-b border-border bg-card shadow-sm">
-        <div className="max-w-screen-2xl mx-auto px-4 py-0 flex items-stretch divide-x divide-border overflow-x-auto">
-          {[
-            { icon: "📡", value: analyses.length, label: "Total Sites",        sub: "Hajj 1447",                color: "text-primary" },
-            { icon: "✓",  value: safeCount,        label: "Safe Sites",         sub: `${((safeCount/analyses.length)*100).toFixed(0)}% of fleet`, color: "text-[#00BFB3]" },
-            { icon: "✗",  value: riskCount,         label: "Risk Sites",         sub: "Requires attention",       color: "text-[#E8175D]" },
-            { icon: "👷", value: totalTechs,        label: "Field Technicians",  sub: "Recommended deployment",   color: "text-primary" },
-            { icon: "🌡", value: "46°C",            label: "Operating Temp",     sub: "Extreme Hajj conditions",  color: "text-[#E8175D]" },
-          ].map(m => (
-            <div key={m.label} className="flex items-center gap-3 px-5 py-2.5 shrink-0">
-              <span className={`text-2xl font-bold tabular-nums ${m.color}`}>{m.value}</span>
-              <div>
-                <div className="text-xs font-semibold text-foreground leading-tight">{m.label}</div>
-                <div className="text-[10px] text-muted-foreground leading-tight">{m.sub}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       <main className="flex-1 max-w-screen-2xl mx-auto w-full px-4 py-4">
         {activeTab === "overview" && (
           <div className="space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+              <MetricCard title="Total COW Sites" value={analyses.length} icon="📡" color="blue" subtitle="Hajj 1447 deployment" />
+              <MetricCard title="Safe Sites" value={safeCount} icon="✓" color="green" subtitle={`${((safeCount/analyses.length)*100).toFixed(0)}% of fleet`} />
+              <MetricCard title="Risk Sites" value={riskCount} icon="✗" color="red" subtitle="Requires attention" />
+              <MetricCard title="Field Technicians" value={totalTechs} icon="👷" color="blue" subtitle="Recommended deployment" />
+              <MetricCard title="Operating Temp" value="46°C" icon="🌡" color="red" subtitle="Extreme Hajj conditions" />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <RiskDistributionPie analyses={analyses} />
               <RiskTypeBreakdown analyses={analyses} />
