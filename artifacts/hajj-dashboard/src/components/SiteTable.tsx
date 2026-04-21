@@ -9,7 +9,7 @@ interface SiteTableProps {
 }
 
 export function SiteTable({ analyses, selectedSiteId, onSelectSite }: SiteTableProps) {
-  const [filter, setFilter] = useState<"all" | "safe" | "warning" | "critical">("all");
+  const [filter, setFilter] = useState<"all" | "safe" | "risk">("all");
   const [locationFilter, setLocationFilter] = useState("all");
   const [search, setSearch] = useState("");
 
@@ -46,20 +46,19 @@ export function SiteTable({ analyses, selectedSiteId, onSelectSite }: SiteTableP
           {locations.map(l => <option key={l} value={l}>{l}</option>)}
         </select>
         <div className="flex gap-1">
-          {(["all", "safe", "warning", "critical"] as const).map(f => (
+          {(["all", "safe", "risk"] as const).map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               className={`px-2.5 py-1 text-xs rounded font-medium capitalize transition-colors ${
                 filter === f
                   ? f === "safe" ? "bg-[#00BFB3] text-white" :
-                    f === "warning" ? "bg-[#FF9AAD] text-white" :
-                    f === "critical" ? "bg-[#E8175D] text-white" :
+                    f === "risk" ? "bg-[#E8175D] text-white" :
                     "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
-              {f === "all" ? `All (${analyses.length})` : f}
+              {f === "all" ? `All (${analyses.length})` : f === "risk" ? `Risk` : "Safe"}
             </button>
           ))}
         </div>
@@ -98,7 +97,7 @@ export function SiteTable({ analyses, selectedSiteId, onSelectSite }: SiteTableP
                   <td className="px-3 py-2">
                     <div className="flex gap-0.5">
                       {Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className={`w-2 h-2 rounded-sm ${i < a.worstRiskScore / 2 ? "bg-red-400" : "bg-muted"}`} />
+                        <div key={i} className={`w-2 h-2 rounded-sm ${i < a.worstRiskScore ? "bg-red-400" : "bg-muted"}`} />
                       ))}
                     </div>
                   </td>

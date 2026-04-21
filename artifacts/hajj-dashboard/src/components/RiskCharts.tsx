@@ -1,5 +1,5 @@
 import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from "recharts";
 import type { SiteAnalysis } from "../lib/calculations";
 
@@ -9,21 +9,16 @@ interface RiskChartsProps {
 
 const COLORS = {
   safe: "#00BFB3",
-  warning: "#FF9AAD",
-  critical: "#E8175D",
+  risk: "#E8175D",
 };
-
-const STC_PALETTE = ["#E8175D", "#00BFB3", "#4A0E8F", "#FF9AAD", "#6CD5DE", "#8B5EC5"];
 
 export function RiskDistributionPie({ analyses }: RiskChartsProps) {
   const safe = analyses.filter(a => a.overallRisk === "safe").length;
-  const warning = analyses.filter(a => a.overallRisk === "warning").length;
-  const critical = analyses.filter(a => a.overallRisk === "critical").length;
+  const risk = analyses.filter(a => a.overallRisk === "risk").length;
 
   const data = [
     { name: "Safe", value: safe, color: COLORS.safe },
-    { name: "Warning", value: warning, color: COLORS.warning },
-    { name: "Critical", value: critical, color: COLORS.critical },
+    { name: "Risk", value: risk, color: COLORS.risk },
   ];
 
   return (
@@ -39,7 +34,7 @@ export function RiskDistributionPie({ analyses }: RiskChartsProps) {
             outerRadius={70}
             paddingAngle={2}
             dataKey="value"
-            label={({ name, value, percent }) => value > 0 ? `${name}: ${value}` : ""}
+            label={({ name, value }) => value > 0 ? `${name}: ${value}` : ""}
             labelLine={true}
           >
             {data.map((entry, i) => (
@@ -54,7 +49,7 @@ export function RiskDistributionPie({ analyses }: RiskChartsProps) {
 }
 
 export function RiskTypeBreakdown({ analyses }: RiskChartsProps) {
-  const byType: Record<"safe" | "warning" | "critical", number> = { safe: 0, warning: 0, critical: 0 };
+  const byType: Record<"safe" | "risk", number> = { safe: 0, risk: 0 };
 
   const counts = {
     power: { ...byType },
@@ -72,13 +67,11 @@ export function RiskTypeBreakdown({ analyses }: RiskChartsProps) {
     }
   }
 
-  const total = analyses.length * 9;
-
   const data = [
-    { category: "Power", safe: counts.power.safe, warning: counts.power.warning, critical: counts.power.critical },
-    { category: "Cooling", safe: counts.cooling.safe, warning: counts.cooling.warning, critical: counts.cooling.critical },
-    { category: "Battery", safe: counts.battery.safe, warning: counts.battery.warning, critical: counts.battery.critical },
-    { category: "Rectifier", safe: counts.rectifier.safe, warning: counts.rectifier.warning, critical: counts.rectifier.critical },
+    { category: "Power",     safe: counts.power.safe,     risk: counts.power.risk },
+    { category: "Cooling",   safe: counts.cooling.safe,   risk: counts.cooling.risk },
+    { category: "Battery",   safe: counts.battery.safe,   risk: counts.battery.risk },
+    { category: "Rectifier", safe: counts.rectifier.safe, risk: counts.rectifier.risk },
   ];
 
   return (
@@ -92,8 +85,7 @@ export function RiskTypeBreakdown({ analyses }: RiskChartsProps) {
           <Tooltip />
           <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
           <Bar dataKey="safe" name="Safe" fill={COLORS.safe} stackId="a" />
-          <Bar dataKey="warning" name="Warning" fill={COLORS.warning} stackId="a" />
-          <Bar dataKey="critical" name="Critical" fill={COLORS.critical} stackId="a" radius={[3, 3, 0, 0]} />
+          <Bar dataKey="risk" name="Risk" fill={COLORS.risk} stackId="a" radius={[3, 3, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -101,11 +93,11 @@ export function RiskTypeBreakdown({ analyses }: RiskChartsProps) {
 }
 
 export function LocationRiskChart({ analyses }: RiskChartsProps) {
-  const byLoc: Record<string, { safe: number; warning: number; critical: number }> = {};
+  const byLoc: Record<string, { safe: number; risk: number }> = {};
 
   for (const a of analyses) {
     const loc = a.site.location;
-    if (!byLoc[loc]) byLoc[loc] = { safe: 0, warning: 0, critical: 0 };
+    if (!byLoc[loc]) byLoc[loc] = { safe: 0, risk: 0 };
     byLoc[loc][a.overallRisk]++;
   }
 
@@ -125,8 +117,7 @@ export function LocationRiskChart({ analyses }: RiskChartsProps) {
           <Tooltip />
           <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
           <Bar dataKey="safe" name="Safe" fill={COLORS.safe} stackId="a" />
-          <Bar dataKey="warning" name="Warning" fill={COLORS.warning} stackId="a" />
-          <Bar dataKey="critical" name="Critical" fill={COLORS.critical} stackId="a" radius={[3, 3, 0, 0]} />
+          <Bar dataKey="risk" name="Risk" fill={COLORS.risk} stackId="a" radius={[3, 3, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

@@ -84,10 +84,10 @@ export interface ScenarioResult {
   rectifierMarginKw: number;
   coolingMarginBtu: number;
 
-  powerRisk: "safe" | "warning" | "critical";
-  rectifierRisk: "safe" | "warning" | "critical";
-  batteryRisk: "safe" | "warning" | "critical";
-  coolingRisk: "safe" | "warning" | "critical";
+  powerRisk: "safe" | "risk";
+  rectifierRisk: "safe" | "risk";
+  batteryRisk: "safe" | "risk";
+  coolingRisk: "safe" | "risk";
 
   riskScore: number;
 }
@@ -95,7 +95,7 @@ export interface ScenarioResult {
 export interface SiteAnalysis {
   site: SiteConfig;
   scenarios: ScenarioResult[];
-  overallRisk: "safe" | "warning" | "critical";
+  overallRisk: "safe" | "risk";
   worstRiskScore: number;
   technicianNeeded: boolean;
 }
@@ -135,11 +135,10 @@ function calcBatteryUsefulHours(
 
 function riskFromMargin(
   margin: number,
-  criticalBelow: number,
-  warningBelow: number
-): "safe" | "warning" | "critical" {
-  if (margin < criticalBelow) return "critical";
-  if (margin < warningBelow) return "warning";
+  riskBelow: number,
+  _unusedWarningBelow: number
+): "safe" | "risk" {
+  if (margin < riskBelow) return "risk";
   return "safe";
 }
 
@@ -239,8 +238,8 @@ export function analyzeScenarios(site: SiteConfig): ScenarioResult[] {
     // ── c) Battery Risk ─────────────────────────────────────────────────────
     // S1–S8: SAFE (rectifier supplying)
     // S9: batteryUsefulHours < 1 → RISK, ≥ 1 → SAFE
-    const batteryRisk: "safe" | "warning" | "critical" =
-      isOutage ? (battHours < 1 ? "critical" : "safe") : "safe";
+    const batteryRisk: "safe" | "risk" =
+      isOutage ? (battHours < 1 ? "risk" : "safe") : "safe";
 
     // ── d) Cooling Margin ───────────────────────────────────────────────────
     // Outage: no cooling → 0 − shelterHeat
@@ -256,17 +255,17 @@ export function analyzeScenarios(site: SiteConfig): ScenarioResult[] {
     }
 
     // ── Risk Classification ─────────────────────────────────────────────────
-    const powerRisk: "safe" | "warning" | "critical" =
-      isOutage ? "critical" : riskFromMargin(powerMargin, 0, 3);
-    const rectifierRisk: "safe" | "warning" | "critical" =
-      isOutage ? "critical" : riskFromMargin(rectifierMargin, 0, 2);
+    const powerRisk: "safe" | "risk" =
+      isOutage ? "risk" : riskFromMargin(powerMargin, 0, 3);
+    const rectifierRisk: "safe" | "risk" =
+      isOutage ? "risk" : riskFromMargin(rectifierMargin, 0, 2);
     // Outdoor cabinet cooling risk hard-coded safe until new formula is provided
-    const coolingRisk: "safe" | "warning" | "critical" =
+    const coolingRisk: "safe" | "risk" =
       site.siteType === "outdoor_cabinet" ? "safe"
-      : isOutage ? "critical"
+      : isOutage ? "risk"
       : riskFromMargin(coolingMargin, 0, 5000);
 
-    const riskMap = { safe: 0, warning: 1, critical: 2 };
+    const riskMap = { safe: 0, risk: 1 };
     const riskScore =
       riskMap[powerRisk] + riskMap[rectifierRisk] +
       riskMap[batteryRisk] + riskMap[coolingRisk];
@@ -314,22 +313,18 @@ export function analyzeSite(site: SiteConfig): SiteAnalysis {
 
   const scenarios = analyzeScenarios(site);
 
-  // Overall risk based on non-outage scenarios (S1–S8)
+  // Overall risk: any non-outage scenario with a risk dimension flagged → "risk"
   const operationalScenarios = scenarios.filter(s => s.powerSource !== "outage");
-  const hasCritical = operationalScenarios.some(
-    s => s.powerRisk === "critical" || s.rectifierRisk === "critical" || s.coolingRisk === "critical"
-  );
-  const hasWarning = operationalScenarios.some(
-    s => s.powerRisk === "warning" || s.rectifierRisk === "warning" ||
-         s.batteryRisk === "warning" || s.coolingRisk === "warning"
+  const hasRisk = operationalScenarios.some(
+    s => s.powerRisk === "risk" || s.rectifierRisk === "risk" ||
+         s.batteryRisk === "risk" || s.coolingRisk === "risk"
   );
 
   const s9 = scenarios.find(s => s.scenarioId === 9);
-  const batteryInsufficient = s9 ? s9.batteryRisk === "critical" : false;
+  const batteryInsufficient = s9 ? s9.batteryRisk === "risk" : false;
 
-  const overallRisk: "safe" | "warning" | "critical" =
-    hasCritical || batteryInsufficient ? "critical" :
-    hasWarning ? "warning" : "safe";
+  const overallRisk: "safe" | "risk" =
+    hasRisk || batteryInsufficient ? "risk" : "safe";
 
   const worstRiskScore = Math.max(...scenarios.map(s => s.riskScore));
 

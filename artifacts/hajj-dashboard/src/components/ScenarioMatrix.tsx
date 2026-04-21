@@ -12,17 +12,15 @@ const SCENARIO_DESCRIPTIONS: Record<number, string[]> = {
   9: ["Power Outage", "Battery Discharge only", "Batteries Discharging", "Load at Full traffic", "Temp at 46°C"],
 };
 
-type RiskLevel = "safe" | "warning" | "critical";
+type RiskLevel = "safe" | "risk";
 
 const DOT_COLOR: Record<RiskLevel, string> = {
-  safe:     "#00BFB3",
-  warning:  "#FF9AAD",
-  critical: "#E8175D",
+  safe: "#00BFB3",
+  risk: "#E8175D",
 };
 
 function worstRisk(levels: RiskLevel[]): RiskLevel {
-  if (levels.includes("critical")) return "critical";
-  if (levels.includes("warning")) return "warning";
+  if (levels.includes("risk")) return "risk";
   return "safe";
 }
 
@@ -56,20 +54,14 @@ export function ScenarioMatrix({ analyses }: ScenarioMatrixProps) {
     const worstBatt    = worstRisk(battRisks);
     const worstCool    = worstRisk(coolRisks);
 
-    // Sites with at least one non-safe risk in this scenario
-    const atRiskCount  = scenarioResults.filter(s =>
-      s.powerRisk !== "safe" || s.rectifierRisk !== "safe" ||
-      s.batteryRisk !== "safe" || s.coolingRisk !== "safe"
-    ).length;
-
-    const criticalCount = scenarioResults.filter(s =>
-      s.powerRisk === "critical" || s.rectifierRisk === "critical" ||
-      s.batteryRisk === "critical" || s.coolingRisk === "critical"
+    const atRiskCount = scenarioResults.filter(s =>
+      s.powerRisk === "risk" || s.rectifierRisk === "risk" ||
+      s.batteryRisk === "risk" || s.coolingRisk === "risk"
     ).length;
 
     const overallWorst = worstRisk([worstPower, worstRect, worstBatt, worstCool]);
 
-    return { sId, worstPower, worstRect, worstBatt, worstCool, atRiskCount, criticalCount, overallWorst };
+    return { sId, worstPower, worstRect, worstBatt, worstCool, atRiskCount, overallWorst };
   });
 
   return (
@@ -127,37 +119,15 @@ export function ScenarioMatrix({ analyses }: ScenarioMatrixProps) {
                       </div>
                     ))}
                   </td>
-                  <td className="px-3 py-4 text-center">
-                    <div className="flex justify-center">
-                      <RiskDot level={row.worstPower} />
-                    </div>
-                  </td>
-                  <td className="px-3 py-4 text-center">
-                    <div className="flex justify-center">
-                      <RiskDot level={row.worstRect} />
-                    </div>
-                  </td>
-                  <td className="px-3 py-4 text-center">
-                    <div className="flex justify-center">
-                      <RiskDot level={row.worstBatt} />
-                    </div>
-                  </td>
-                  <td className="px-3 py-4 text-center">
-                    <div className="flex justify-center">
-                      <RiskDot level={row.worstCool} />
-                    </div>
-                  </td>
+                  <td className="px-3 py-4 text-center"><div className="flex justify-center"><RiskDot level={row.worstPower} /></div></td>
+                  <td className="px-3 py-4 text-center"><div className="flex justify-center"><RiskDot level={row.worstRect} /></div></td>
+                  <td className="px-3 py-4 text-center"><div className="flex justify-center"><RiskDot level={row.worstBatt} /></div></td>
+                  <td className="px-3 py-4 text-center"><div className="flex justify-center"><RiskDot level={row.worstCool} /></div></td>
                   <td className="px-3 py-4 text-center">
                     <div className="flex flex-col items-center gap-1">
                       <span
                         className="inline-flex items-center justify-center text-white font-bold text-sm rounded-lg px-3 py-1 min-w-[48px]"
-                        style={{
-                          background: row.atRiskCount === 0
-                            ? "#00BFB3"
-                            : row.criticalCount > 0
-                            ? "#E8175D"
-                            : "#FF9AAD",
-                        }}
+                        style={{ background: row.atRiskCount === 0 ? "#00BFB3" : "#E8175D" }}
                       >
                         {row.atRiskCount}
                       </span>
@@ -173,13 +143,12 @@ export function ScenarioMatrix({ analyses }: ScenarioMatrixProps) {
         </table>
       </div>
 
-      {/* Legend */}
       <div className="px-5 py-3 border-t border-border bg-gray-50 flex items-center gap-6 flex-wrap">
         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Legend:</span>
-        {(["safe", "warning", "critical"] as RiskLevel[]).map(r => (
+        {(["safe", "risk"] as RiskLevel[]).map(r => (
           <div key={r} className="flex items-center gap-1.5">
             <span className="w-3.5 h-3.5 rounded-full inline-block border border-white shadow-sm" style={{ background: DOT_COLOR[r] }} />
-            <span className="text-xs text-gray-600 capitalize font-medium">{r}</span>
+            <span className="text-xs text-gray-600 capitalize font-medium">{r === "risk" ? "Risk" : "Safe"}</span>
           </div>
         ))}
         <span className="text-xs text-gray-400 ml-auto">Worst-case across all {analyses.length} sites per scenario</span>

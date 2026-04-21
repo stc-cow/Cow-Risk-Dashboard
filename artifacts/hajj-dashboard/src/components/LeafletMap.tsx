@@ -14,15 +14,13 @@ L.Icon.Default.mergeOptions({
 });
 
 const RISK_COLORS = {
-  safe:     "#00BFB3",
-  warning:  "#FF9AAD",
-  critical: "#E8175D",
+  safe: "#00BFB3",
+  risk: "#E8175D",
 };
 
 const RISK_FILL_OPACITY = {
-  safe:     0.75,
-  warning:  0.85,
-  critical: 0.9,
+  safe: 0.75,
+  risk: 0.9,
 };
 
 interface HeatmapLayerProps {
@@ -38,7 +36,7 @@ function HeatmapLayer({ analyses }: HeatmapLayerProps) {
       map.removeLayer(layerRef.current);
     }
 
-    const riskWeight = { safe: 0.3, warning: 0.7, critical: 1.0 };
+    const riskWeight = { safe: 0.3, risk: 1.0 };
 
     const points = analyses.map(a => [
       a.site.lat,
@@ -129,8 +127,8 @@ export function LeafletMap({ analyses, selectedSiteId, onSelectSite }: LeafletMa
                     <span
                       className="text-[10px] px-2 py-0.5 rounded font-bold uppercase"
                       style={{
-                        background: a.overallRisk === "safe" ? "#d0f5f3" : a.overallRisk === "warning" ? "#ffe0e8" : "#fce4ed",
-                        color: a.overallRisk === "safe" ? "#00736b" : a.overallRisk === "warning" ? "#a03050" : "#b01040",
+                        background: a.overallRisk === "safe" ? "#d0f5f3" : "#fce4ed",
+                        color: a.overallRisk === "safe" ? "#00736b" : "#b01040",
                         border: `1px solid ${RISK_COLORS[a.overallRisk]}`,
                       }}
                     >
@@ -188,10 +186,10 @@ export function LeafletMap({ analyses, selectedSiteId, onSelectSite }: LeafletMa
       {/* Legend */}
       <div className="absolute bottom-8 right-3 z-[1000] bg-white/95 backdrop-blur rounded-xl px-3 py-2.5 text-xs shadow-lg border border-gray-200">
         <div className="font-bold text-gray-700 mb-1.5 uppercase tracking-wide text-[10px]">Risk Level</div>
-        {(["safe", "warning", "critical"] as const).map(r => (
+        {(["safe", "risk"] as const).map(r => (
           <div key={r} className="flex items-center gap-2 mb-1">
             <span className="w-3 h-3 rounded-full inline-block border border-white shadow-sm" style={{ background: RISK_COLORS[r] }} />
-            <span className="capitalize text-gray-600 font-medium">{r}</span>
+            <span className="capitalize text-gray-600 font-medium">{r === "risk" ? "Risk" : "Safe"}</span>
           </div>
         ))}
         <div className="border-t border-gray-100 mt-1.5 pt-1.5 text-[10px] text-gray-400">

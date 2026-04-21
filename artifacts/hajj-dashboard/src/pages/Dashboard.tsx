@@ -20,8 +20,7 @@ export default function Dashboard() {
   const analyses = useMemo(() => ALL_SITES.map(analyzeSite), []);
 
   const safeCount = analyses.filter(a => a.overallRisk === "safe").length;
-  const warningCount = analyses.filter(a => a.overallRisk === "warning").length;
-  const criticalCount = analyses.filter(a => a.overallRisk === "critical").length;
+  const riskCount = analyses.filter(a => a.overallRisk === "risk").length;
 
   const selectedAnalysis = selectedSiteId ? analyses.find(a => a.site.id === selectedSiteId) ?? null : null;
 
@@ -30,8 +29,7 @@ export default function Dashboard() {
     if (activeTab !== "map" && activeTab !== "sites") setActiveTab("map");
   };
 
-  const totalTechs =
-    Math.ceil(criticalCount / 3) + Math.ceil(warningCount / 6);
+  const totalTechs = Math.ceil(riskCount / 3);
 
   const tabs: Array<{ key: Tab; label: string; icon: string }> = [
     { key: "overview", label: "Overview", icon: "📊" },
@@ -69,12 +67,8 @@ export default function Dashboard() {
 
               <div className="flex gap-2">
                 <div className="bg-red-500/30 border border-red-400/30 rounded-lg px-3 py-1.5 text-center">
-                  <div className="text-lg font-bold text-red-200">{criticalCount}</div>
-                  <div className="text-[10px] text-red-300 uppercase">Critical</div>
-                </div>
-                <div className="bg-amber-500/30 border border-amber-400/30 rounded-lg px-3 py-1.5 text-center">
-                  <div className="text-lg font-bold text-amber-200">{warningCount}</div>
-                  <div className="text-[10px] text-amber-300 uppercase">Warning</div>
+                  <div className="text-lg font-bold text-red-200">{riskCount}</div>
+                  <div className="text-[10px] text-red-300 uppercase">Risk</div>
                 </div>
                 <div className="bg-emerald-500/30 border border-emerald-400/30 rounded-lg px-3 py-1.5 text-center">
                   <div className="text-lg font-bold text-emerald-200">{safeCount}</div>
@@ -108,8 +102,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
               <MetricCard title="Total COW Sites" value={analyses.length} icon="📡" color="blue" subtitle="Hajj 1447 deployment" />
               <MetricCard title="Safe Sites" value={safeCount} icon="✓" color="green" subtitle={`${((safeCount/analyses.length)*100).toFixed(0)}% of fleet`} />
-              <MetricCard title="Warning Sites" value={warningCount} icon="⚠" color="yellow" subtitle="Requires monitoring" />
-              <MetricCard title="Critical Sites" value={criticalCount} icon="✗" color="red" subtitle="Immediate attention" />
+              <MetricCard title="Risk Sites" value={riskCount} icon="✗" color="red" subtitle="Requires attention" />
               <MetricCard title="Field Technicians" value={totalTechs} icon="👷" color="blue" subtitle="Recommended deployment" />
               <MetricCard title="Operating Temp" value="46°C" icon="🌡" color="red" subtitle="Extreme Hajj conditions" />
             </div>
@@ -192,8 +185,7 @@ export default function Dashboard() {
                   <div className="text-4xl opacity-30">📍</div>
                   <p>Click a site marker on the map to view detailed risk analysis</p>
                   <p className="text-xs">
-                    <span className="text-red-500 font-semibold">{criticalCount} critical</span> ·{" "}
-                    <span className="text-amber-500 font-semibold">{warningCount} warning</span> ·{" "}
+                    <span className="text-red-500 font-semibold">{riskCount} risk</span> ·{" "}
                     <span className="text-emerald-500 font-semibold">{safeCount} safe</span>
                   </p>
                 </div>
@@ -229,11 +221,11 @@ export default function Dashboard() {
             <div className="xl:col-span-2">
               <div className="bg-card border border-card-border rounded-xl p-4 shadow-sm">
                 <div className="font-semibold text-sm mb-4 flex items-center gap-2">
-                  <span>🚨</span> Critical Sites — Immediate Deployment Required
+                  <span>🚨</span> Risk Sites — Deployment Required
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-96 overflow-auto">
-                  {analyses.filter(a => a.overallRisk === "critical").map(a => {
-                    const worst = a.scenarios.reduce((acc, s) => s.riskScore > acc.riskScore ? s : acc);
+                  {analyses.filter(a => a.overallRisk === "risk").map(a => {
+                    const worst = a.scenarios.length ? a.scenarios.reduce((acc, s) => s.riskScore > acc.riskScore ? s : acc) : null;
                     return (
                       <button
                         key={a.site.id}
@@ -245,46 +237,26 @@ export default function Dashboard() {
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-mono font-bold text-sm">{a.site.id}</span>
-                          <span className="text-xs font-semibold" style={{color:"#E8175D"}}>Score: {a.worstRiskScore}/8</span>
+                          <span className="text-xs font-semibold" style={{color:"#E8175D"}}>Score: {a.worstRiskScore}/4</span>
                         </div>
                         <div className="text-xs text-muted-foreground">{a.site.location}</div>
                         <div className="text-xs text-muted-foreground mt-1 capitalize">{a.site.siteType.replace("_", " ")} · {a.site.generatorKva} kVA</div>
-                        <div className="flex gap-1 mt-1.5 flex-wrap">
-                          {(["powerRisk", "coolingRisk", "batteryRisk", "rectifierRisk"] as const).map(r => {
-                            const risk = worst[r];
-                            if (risk !== "critical") return null;
-                            const label = r.replace("Risk", "").replace(/([A-Z])/g, " $1").trim();
-                            return (
-                              <span key={r} className="text-[9px] px-1.5 py-0.5 rounded font-semibold uppercase" style={{background:"#fce4ed", color:"#b01040", border:"1px solid #E8175D"}}>
-                                {label}
-                              </span>
-                            );
-                          })}
-                        </div>
+                        {worst && (
+                          <div className="flex gap-1 mt-1.5 flex-wrap">
+                            {(["powerRisk", "coolingRisk", "batteryRisk", "rectifierRisk"] as const).map(r => {
+                              if (worst[r] !== "risk") return null;
+                              const label = r.replace("Risk", "").replace(/([A-Z])/g, " $1").trim();
+                              return (
+                                <span key={r} className="text-[9px] px-1.5 py-0.5 rounded font-semibold uppercase" style={{background:"#fce4ed", color:"#b01040", border:"1px solid #E8175D"}}>
+                                  {label}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
                       </button>
                     );
                   })}
-                </div>
-              </div>
-
-              <div className="bg-card border border-card-border rounded-xl p-4 shadow-sm mt-4">
-                <div className="font-semibold text-sm mb-4 flex items-center gap-2">
-                  <span>⚠️</span> Warning Sites — Periodic Inspection Required
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 max-h-64 overflow-auto">
-                  {analyses.filter(a => a.overallRisk === "warning").map(a => (
-                    <button
-                      key={a.site.id}
-                      onClick={() => handleSelectSite(a.site.id)}
-                      className={`text-left p-2.5 rounded-lg border transition-all hover:shadow-md ${
-                        selectedSiteId === a.site.id ? "border-primary bg-primary/5 ring-1 ring-primary" : ""
-                      }`}
-                      style={selectedSiteId !== a.site.id ? {background:"#ffe0e8", borderColor:"#FF9AAD"} : {}}
-                    >
-                      <div className="font-mono font-bold text-sm">{a.site.id}</div>
-                      <div className="text-xs text-muted-foreground truncate">{a.site.location}</div>
-                    </button>
-                  ))}
                 </div>
               </div>
             </div>

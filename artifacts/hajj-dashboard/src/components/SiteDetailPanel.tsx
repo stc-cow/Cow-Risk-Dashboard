@@ -44,15 +44,12 @@ export function SiteDetailPanel({ analysis, onClose }: SiteDetailPanelProps) {
         <div className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Scenario</div>
         <div className="flex flex-wrap gap-1">
           {scenarios.map((s, i) => {
-            const worstRisk = [s.powerRisk, s.rectifierRisk, s.batteryRisk, s.coolingRisk].reduce((acc, r) => {
-              if (r === "critical") return "critical";
-              if (r === "warning" && acc !== "critical") return "warning";
-              return acc;
-            }, "safe" as "safe" | "warning" | "critical");
+            const worstRisk = [s.powerRisk, s.rectifierRisk, s.batteryRisk, s.coolingRisk].includes("risk")
+              ? "risk" : "safe";
 
-            const bg = worstRisk === "safe" ? "bg-[#d0f5f3] border-[#00BFB3] text-[#00736b]" :
-              worstRisk === "warning" ? "bg-[#ffe0e8] border-[#FF9AAD] text-[#a03050]" :
-              "bg-[#fce4ed] border-[#E8175D] text-[#b01040]";
+            const bg = worstRisk === "safe"
+              ? "bg-[#d0f5f3] border-[#00BFB3] text-[#00736b]"
+              : "bg-[#fce4ed] border-[#E8175D] text-[#b01040]";
             const activeCls = activeScenario === i ? "ring-2 ring-primary ring-offset-1 font-bold" : "";
 
             return (
