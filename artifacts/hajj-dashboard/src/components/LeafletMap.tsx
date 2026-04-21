@@ -95,7 +95,7 @@ export function LeafletMap({ analyses, selectedSiteId, onSelectSite }: LeafletMa
   const center: [number, number] = [21.38, 39.93];
 
   return (
-    <div className="relative rounded-xl overflow-hidden border border-border" style={{ height: 460 }}>
+    <div className="relative rounded-xl overflow-hidden border border-border" style={{ height: "100%", minHeight: 420 }}>
       <MapContainer
         center={center}
         zoom={11}

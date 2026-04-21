@@ -166,10 +166,12 @@ export default function Dashboard() {
         )}
 
         {activeTab === "map" && (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[calc(100vh-200px)]">
-            <div className="lg:col-span-3">
-              <LeafletMap analyses={analyses} selectedSiteId={selectedSiteId} onSelectSite={handleSelectSite} />
-              <div className="mt-3 grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[calc(100vh-148px)]">
+            <div className="lg:col-span-3 flex flex-col gap-3 h-full min-h-0">
+              <div className="flex-1 min-h-0">
+                <LeafletMap analyses={analyses} selectedSiteId={selectedSiteId} onSelectSite={handleSelectSite} />
+              </div>
+              <div className="grid grid-cols-3 gap-3 shrink-0">
                 <RiskDistributionPie analyses={analyses} />
                 <LocationRiskChart analyses={analyses} />
                 <TechnicianRecommendation analyses={analyses} />
