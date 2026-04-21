@@ -1,36 +1,38 @@
 import type { SiteConfig } from "./calculations";
 
 // ─── Real Hajj 1447 COW Data ───────────────────────────────────────────────
-// Power Source codes:
-//   SG = Single Generator (prime power only)
-//   SB = SEC (grid) + Backup Generator
-//   generatorKva for SB = SEC_Amps × 0.5  (gives correct calcGeneratorNetPower output)
-//   generatorAge for SB = 0 (grid never degrades)
-// Battery capacity = Ah_per_string × number_of_strings
-// telecomLoadAmps = telecomLoadKw × 1000 / 48
+// telecomPowerKw  = total load (outdoor + indoor) → used in ALL power margins
+// telecomHeatKw   = heat-generating load inside cooled space:
+//    shelter sites  → indoor/shelter equipment only (≈43% of outdoor load)
+//    outdoor cabinet→ = telecomPowerKw (all equipment heat inside the cabinet)
+//
+// SB sites: generatorKva = SEC_Amps × 0.5, generatorAge = 0 (grid)
+// SG sites: generatorKva = rated gen KVA, generatorAge from working hours
+// Battery: lead-acid DOD=50%, effective discharge c-rate=0.5
 // ───────────────────────────────────────────────────────────────────────────
 
 export function buildRealSites(): SiteConfig[] {
   return [
     // ── SHELTER SITES ──────────────────────────────────────────────────────
 
-    // CWN105  SB  Shelter  Arafat  SEC=150A  backupGen=30KVA@0h
+    // CWN105  SB  Arafat  SEC=150A  backupGen=30KVA@0h
+    // telecom: EXACT from spreadsheet — outdoor=8.4, indoor=3.6, total=12.0
     {
       id: "CWN105", name: "Arafat — CWN105", location: "Arafat",
       lat: 21.35622, lng: 39.98477,
       siteType: "shelter", powerConfig: "commercial_with_backup",
-      generatorKva: 75,       // SEC 150A × 0.5
-      generatorAge: 0,        // grid
+      generatorKva: 75, generatorAge: 0,          // SEC 150A × 0.5
       backupGeneratorKva: 30, backupGeneratorAge: 0,
       rectifierCapacityKw: 18,
       ac1CapacityBtu: 36000, ac1Age: 0,
       ac2CapacityBtu: 36000, ac2Age: 0,
-      batteryCapacityAh: 600,  // 200Ah × 3 strings
+      batteryCapacityAh: 600,                     // 200Ah × 3 strings
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 175,    // 8.4KW × 1000/48
+      telecomPowerKw: 12.0,                       // EXACT: outdoor 8.4 + indoor 3.6
+      telecomHeatKw:  3.6,                        // EXACT: indoor shelter load
     },
 
-    // CWN923  SG  Shelter  Arafat  gen=30KVA@3110h≈0yr
+    // CWN923  SG  Arafat  gen=30KVA@3110h≈0yr
     {
       id: "CWN923", name: "Arafat — CWN923", location: "Arafat",
       lat: 21.361257, lng: 39.973944,
@@ -39,12 +41,13 @@ export function buildRealSites(): SiteConfig[] {
       rectifierCapacityKw: 19.2,
       ac1CapacityBtu: 36000, ac1Age: 0,
       ac2CapacityBtu: 36000, ac2Age: 0,
-      batteryCapacityAh: 950,  // 190Ah × 5 strings
+      batteryCapacityAh: 950,                     // 190Ah × 5 strings
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 219,    // 10.5KW × 1000/48
+      telecomPowerKw: 15.0,                       // outdoor 10.5 + indoor 4.5
+      telecomHeatKw:  4.5,
     },
 
-    // CWN991  SB  Shelter  Arafat  SEC=100A  backupGen=30KVA@15578h≈1yr
+    // CWN991  SB  Arafat  SEC=100A  backupGen=30KVA@15578h≈1yr
     {
       id: "CWN991", name: "Arafat — CWN991", location: "Arafat",
       lat: 21.37224, lng: 39.93826,
@@ -54,12 +57,13 @@ export function buildRealSites(): SiteConfig[] {
       rectifierCapacityKw: 19.2,
       ac1CapacityBtu: 48000, ac1Age: 0,
       ac2CapacityBtu: 48000, ac2Age: 0,
-      batteryCapacityAh: 800,  // 200Ah × 4 strings
+      batteryCapacityAh: 800,                     // 200Ah × 4 strings
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 175,
+      telecomPowerKw: 12.0,
+      telecomHeatKw:  3.6,
     },
 
-    // CWN092  SG  Shelter  Arafat  gen=30KVA@25098h≈2yr  telecom=0
+    // CWN092  SG  Arafat  gen=30KVA@25098h≈2yr  telecom=0
     {
       id: "CWN092", name: "Arafat — CWN092", location: "Arafat",
       lat: 21.333244, lng: 39.971526,
@@ -68,12 +72,13 @@ export function buildRealSites(): SiteConfig[] {
       rectifierCapacityKw: 16,
       ac1CapacityBtu: 36000, ac1Age: 0,
       ac2CapacityBtu: 36000, ac2Age: 0,
-      batteryCapacityAh: 400,  // 200Ah × 2 strings
+      batteryCapacityAh: 400,                     // 200Ah × 2 strings
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 0,
+      telecomPowerKw: 0,
+      telecomHeatKw:  0,
     },
 
-    // CWN076  SG  Shelter  Arafat  gen=30KVA@18324h≈2yr
+    // CWN076  SG  Arafat  gen=30KVA@18324h≈2yr
     {
       id: "CWN076", name: "Arafat — CWN076", location: "Arafat",
       lat: 21.3692, lng: 39.977127,
@@ -82,12 +87,13 @@ export function buildRealSites(): SiteConfig[] {
       rectifierCapacityKw: 15,
       ac1CapacityBtu: 36000, ac1Age: 0,
       ac2CapacityBtu: 36000, ac2Age: 0,
-      batteryCapacityAh: 1400, // 200Ah × 7 strings
+      batteryCapacityAh: 1400,                    // 200Ah × 7 strings
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 175,
+      telecomPowerKw: 12.0,
+      telecomHeatKw:  3.6,
     },
 
-    // CWN108  SB  Shelter  Arafat  SEC=100A  backupGen=30KVA@42885h≈4yr
+    // CWN108  SB  Arafat  SEC=100A  backupGen=30KVA@42885h≈4yr
     {
       id: "CWN108", name: "Arafat — CWN108", location: "Arafat",
       lat: 21.34916, lng: 39.98367,
@@ -97,27 +103,29 @@ export function buildRealSites(): SiteConfig[] {
       rectifierCapacityKw: 18,
       ac1CapacityBtu: 36000, ac1Age: 0,
       ac2CapacityBtu: 36000, ac2Age: 0,
-      batteryCapacityAh: 600,  // 200Ah × 3 strings
+      batteryCapacityAh: 600,                     // 200Ah × 3 strings
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 175,
+      telecomPowerKw: 12.0,
+      telecomHeatKw:  3.6,
     },
 
-    // CWN087  SB  Shelter  Arafat  SEC=70A  backupGen=35KVA@0h
+    // CWN087  SB  Arafat  SEC=70A  backupGen=35KVA@0h
     {
       id: "CWN087", name: "Arafat — CWN087", location: "Arafat",
       lat: 21.35694, lng: 39.97782,
       siteType: "shelter", powerConfig: "commercial_with_backup",
-      generatorKva: 35, generatorAge: 0,
+      generatorKva: 35, generatorAge: 0,          // SEC 70A × 0.5
       backupGeneratorKva: 35, backupGeneratorAge: 0,
       rectifierCapacityKw: 21,
       ac1CapacityBtu: 36000, ac1Age: 0,
       ac2CapacityBtu: 36000, ac2Age: 0,
-      batteryCapacityAh: 760,  // 190Ah × 4 strings
+      batteryCapacityAh: 760,                     // 190Ah × 4 strings
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 175,
+      telecomPowerKw: 12.0,
+      telecomHeatKw:  3.6,
     },
 
-    // CWN075  SB  Shelter  Arafat  SEC=100A  backupGen=35KVA@1798h≈0yr
+    // CWN075  SB  Arafat  SEC=100A  backupGen=35KVA@1798h≈0yr
     {
       id: "CWN075", name: "Arafat — CWN075", location: "Arafat",
       lat: 21.346996, lng: 39.957369,
@@ -129,10 +137,11 @@ export function buildRealSites(): SiteConfig[] {
       ac2CapacityBtu: 36000, ac2Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 175,
+      telecomPowerKw: 12.0,
+      telecomHeatKw:  3.6,
     },
 
-    // CWN072  SB  Shelter  Arafat  SEC=100A  backupGen=25KVA@0h
+    // CWN072  SB  Arafat  SEC=100A  backupGen=25KVA@0h
     {
       id: "CWN072", name: "Arafat — CWN072", location: "Arafat",
       lat: 21.34196, lng: 39.97602,
@@ -142,12 +151,13 @@ export function buildRealSites(): SiteConfig[] {
       rectifierCapacityKw: 21.6,
       ac1CapacityBtu: 36000, ac1Age: 0,
       ac2CapacityBtu: 36000, ac2Age: 0,
-      batteryCapacityAh: 1475, // 295Ah × 5 strings
+      batteryCapacityAh: 1475,                    // 295Ah × 5 strings
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 175,
+      telecomPowerKw: 12.0,
+      telecomHeatKw:  3.6,
     },
 
-    // CWN078  SB  Shelter  Arafat  SEC=100A  backupGen=35KVA@0h
+    // CWN078  SB  Arafat  SEC=100A  backupGen=35KVA@0h
     {
       id: "CWN078", name: "Arafat — CWN078", location: "Arafat",
       lat: 21.34051, lng: 39.99548,
@@ -159,10 +169,11 @@ export function buildRealSites(): SiteConfig[] {
       ac2CapacityBtu: 36000, ac2Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 175,
+      telecomPowerKw: 12.0,
+      telecomHeatKw:  3.6,
     },
 
-    // CWN080  SG  Shelter  Arafat  gen=35KVA@22058h≈2yr  telecom=0
+    // CWN080  SG  Arafat  gen=35KVA@22058h≈2yr  telecom=0
     {
       id: "CWN080", name: "Arafat — CWN080", location: "Arafat",
       lat: 21.378152, lng: 39.990098,
@@ -173,10 +184,11 @@ export function buildRealSites(): SiteConfig[] {
       ac2CapacityBtu: 36000, ac2Age: 0,
       batteryCapacityAh: 760,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 0,
+      telecomPowerKw: 0,
+      telecomHeatKw:  0,
     },
 
-    // CWN084  SB  Shelter  Arafat  SEC=100A  backupGen=35KVA@0h
+    // CWN084  SB  Arafat  SEC=100A  backupGen=35KVA@0h
     {
       id: "CWN084", name: "Arafat — CWN084", location: "Arafat",
       lat: 21.342528, lng: 39.962167,
@@ -188,10 +200,11 @@ export function buildRealSites(): SiteConfig[] {
       ac2CapacityBtu: 36000, ac2Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 219,    // 10.5KW
+      telecomPowerKw: 15.0,
+      telecomHeatKw:  4.5,
     },
 
-    // CWN085  SB  Shelter  Arafat  SEC=100A  backupGen=35KVA@0h
+    // CWN085  SB  Arafat  SEC=100A  backupGen=35KVA@0h
     {
       id: "CWN085", name: "Arafat — CWN085", location: "Arafat",
       lat: 21.36681, lng: 39.96439,
@@ -203,10 +216,11 @@ export function buildRealSites(): SiteConfig[] {
       ac2CapacityBtu: 36000, ac2Age: 0,
       batteryCapacityAh: 760,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 175,
+      telecomPowerKw: 12.0,
+      telecomHeatKw:  3.6,
     },
 
-    // CWN073  SB  Shelter  Arafat  SEC=100A  backupGen=45KVA@0h
+    // CWN073  SB  Arafat  SEC=100A  backupGen=45KVA@0h
     {
       id: "CWN073", name: "Arafat — CWN073", location: "Arafat",
       lat: 21.3738433, lng: 39.9865483,
@@ -218,25 +232,27 @@ export function buildRealSites(): SiteConfig[] {
       ac2CapacityBtu: 36000, ac2Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 248,    // 11.9KW
+      telecomPowerKw: 17.0,                       // outdoor 11.9 + indoor 5.1
+      telecomHeatKw:  5.1,
     },
 
-    // CWN093  SB  Shelter  Arafat  SEC=200A  backupGen=45KVA@31766h≈3yr
+    // CWN093  SB  Arafat  SEC=200A  backupGen=45KVA@31766h≈3yr
     {
       id: "CWN093", name: "Arafat — CWN093", location: "Arafat",
       lat: 21.3568, lng: 39.93535,
       siteType: "shelter", powerConfig: "commercial_with_backup",
-      generatorKva: 100, generatorAge: 0,
+      generatorKva: 100, generatorAge: 0,         // SEC 200A × 0.5
       backupGeneratorKva: 45, backupGeneratorAge: 3,
       rectifierCapacityKw: 21,
       ac1CapacityBtu: 36000, ac1Age: 0,
       ac2CapacityBtu: 36000, ac2Age: 0,
-      batteryCapacityAh: 1600, // 200Ah × 8 strings
+      batteryCapacityAh: 1600,                    // 200Ah × 8 strings
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 219,
+      telecomPowerKw: 15.0,
+      telecomHeatKw:  4.5,
     },
 
-    // CWN038  SG  Shelter  Arafat  gen=30KVA@1525h≈0yr  telecom=0
+    // CWN038  SG  Arafat  gen=30KVA@1525h≈0yr  telecom=0
     {
       id: "CWN038", name: "Arafat — CWN038", location: "Arafat",
       lat: 21.328514, lng: 39.961343,
@@ -247,10 +263,11 @@ export function buildRealSites(): SiteConfig[] {
       ac2CapacityBtu: 48000, ac2Age: 0,
       batteryCapacityAh: 1400,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 0,
+      telecomPowerKw: 0,
+      telecomHeatKw:  0,
     },
 
-    // CWN083  SG  Shelter  Arafat  gen=35KVA@6125h≈0yr
+    // CWN083  SG  Arafat  gen=35KVA@6125h≈0yr
     {
       id: "CWN083", name: "Arafat — CWN083", location: "Arafat",
       lat: 21.331372, lng: 39.965547,
@@ -261,10 +278,11 @@ export function buildRealSites(): SiteConfig[] {
       ac2CapacityBtu: 36000, ac2Age: 0,
       batteryCapacityAh: 600,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 175,
+      telecomPowerKw: 12.0,
+      telecomHeatKw:  3.6,
     },
 
-    // CWN908  PowerSource=0  Shelter  Arafat  all zeros (pending data)
+    // CWN908  Pending data — placeholder safe
     {
       id: "CWN908", name: "Arafat — CWN908", location: "Arafat",
       lat: 21.365285, lng: 39.95051,
@@ -274,11 +292,12 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 0, ac1Age: 0,
       batteryCapacityAh: 0,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 0,
-      placeholderSafe: true,   // no data yet
+      telecomPowerKw: 0,
+      telecomHeatKw:  0,
+      placeholderSafe: true,
     },
 
-    // CWN102  SB  Shelter  Arafat  SEC=100A  backupGen=45KVA@11794h≈1yr
+    // CWN102  SB  Arafat  SEC=100A  backupGen=45KVA@11794h≈1yr
     {
       id: "CWN102", name: "Arafat — CWN102", location: "Arafat",
       lat: 21.35901, lng: 39.95689,
@@ -288,14 +307,16 @@ export function buildRealSites(): SiteConfig[] {
       rectifierCapacityKw: 19.2,
       ac1CapacityBtu: 36000, ac1Age: 0,
       ac2CapacityBtu: 36000, ac2Age: 0,
-      batteryCapacityAh: 1600, // 200Ah × 8 strings
+      batteryCapacityAh: 1600,                    // 200Ah × 8 strings
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 219,
+      telecomPowerKw: 15.0,
+      telecomHeatKw:  4.5,
     },
 
     // ── OUTDOOR CABINET SITES ──────────────────────────────────────────────
+    // All telecom heat goes inside the cabinet → telecomHeatKw = telecomPowerKw
 
-    // CWN206  SG  Outdoor  Muzdalifah  gen=30KVA@32553h≈3yr  telecom=0
+    // CWN206  SG  Muzdalifah  gen=30KVA@32553h≈3yr  telecom=0
     {
       id: "CWN206", name: "Muzdalifah — CWN206", location: "Muzdalifah",
       lat: 21.390274, lng: 39.928265,
@@ -305,10 +326,11 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 10200, ac1Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 0,
+      telecomPowerKw: 0,
+      telecomHeatKw:  0,
     },
 
-    // CWN956  SB  Outdoor  Arafat  SEC=100A  backupGen=30KVA@0h
+    // CWN956  SB  Arafat  SEC=100A  backupGen=30KVA@0h
     {
       id: "CWN956", name: "Arafat — CWN956", location: "Arafat",
       lat: 21.3704107, lng: 39.9854222,
@@ -319,10 +341,11 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 10200, ac1Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 220,    // 10.56KW
+      telecomPowerKw: 10.56,
+      telecomHeatKw:  10.56,
     },
 
-    // CWN980  SB  Outdoor  Arafat  SEC=100A  backupGen=30KVA@0h
+    // CWN980  SB  Arafat  SEC=100A  backupGen=30KVA@0h
     {
       id: "CWN980", name: "Arafat — CWN980", location: "Arafat",
       lat: 21.371837, lng: 39.985979,
@@ -333,10 +356,11 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 10200, ac1Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 220,
+      telecomPowerKw: 10.56,
+      telecomHeatKw:  10.56,
     },
 
-    // CWN951  SB  Outdoor  Arafat  SEC=100A  backupGen=30KVA@0h
+    // CWN951  SB  Arafat  SEC=100A  backupGen=30KVA@0h
     {
       id: "CWN951", name: "Arafat — CWN951", location: "Arafat",
       lat: 21.36258, lng: 39.96906,
@@ -347,10 +371,11 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 10200, ac1Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 220,
+      telecomPowerKw: 10.56,
+      telecomHeatKw:  10.56,
     },
 
-    // CWN020  SB  Outdoor  Arafat  SEC=100A  backupGen=35KVA@2350h≈0yr
+    // CWN020  SB  Arafat  SEC=100A  backupGen=35KVA@2350h≈0yr
     {
       id: "CWN020", name: "Arafat — CWN020", location: "Arafat",
       lat: 21.35047, lng: 39.96813,
@@ -361,10 +386,11 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 10200, ac1Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 275,    // 13.2KW
+      telecomPowerKw: 13.2,
+      telecomHeatKw:  13.2,
     },
 
-    // CWN901  SG  Outdoor  Arafat  gen=30KVA@12495h≈1yr  telecom=0
+    // CWN901  SG  Arafat  gen=30KVA@12495h≈1yr  telecom=0
     {
       id: "CWN901", name: "Arafat — CWN901", location: "Arafat",
       lat: 21.372652, lng: 39.989533,
@@ -374,10 +400,11 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 10200, ac1Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 0,
+      telecomPowerKw: 0,
+      telecomHeatKw:  0,
     },
 
-    // CWN203  SB  Outdoor  Arafat  SEC=100A  backupGen=35KVA@0h
+    // CWN203  SB  Arafat  SEC=100A  backupGen=35KVA@0h
     {
       id: "CWN203", name: "Arafat — CWN203", location: "Arafat",
       lat: 21.354658, lng: 39.986218,
@@ -388,10 +415,11 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 10200, ac1Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 312,    // 14.96KW
+      telecomPowerKw: 14.98,
+      telecomHeatKw:  14.98,
     },
 
-    // CWN914  SB  Outdoor  Arafat  SEC=100A  backupGen=30KVA@0h
+    // CWN914  SB  Arafat  SEC=100A  backupGen=30KVA@0h
     {
       id: "CWN914", name: "Arafat — CWN914", location: "Arafat",
       lat: 21.365421, lng: 39.971661,
@@ -402,10 +430,11 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 10200, ac1Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 220,
+      telecomPowerKw: 10.56,
+      telecomHeatKw:  10.56,
     },
 
-    // CWN015  SB  Outdoor  Arafat  SEC=100A  backupGen=30KVA@0h
+    // CWN015  SB  Arafat  SEC=100A  backupGen=30KVA@0h
     {
       id: "CWN015", name: "Arafat — CWN015", location: "Arafat",
       lat: 21.377645, lng: 39.986816,
@@ -416,10 +445,11 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 10200, ac1Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 220,
+      telecomPowerKw: 10.56,
+      telecomHeatKw:  10.56,
     },
 
-    // CWN212  SB  Outdoor  Arafat  SEC=100A  backupGen=35KVA@0h
+    // CWN212  SB  Arafat  SEC=100A  backupGen=35KVA@0h
     {
       id: "CWN212", name: "Arafat — CWN212", location: "Arafat",
       lat: 21.366124, lng: 39.984126,
@@ -430,24 +460,26 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 10200, ac1Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 275,
+      telecomPowerKw: 13.2,
+      telecomHeatKw:  13.2,
     },
 
-    // CWN992  SB  Outdoor  Muzdalifah  SEC=60A  backupGen=30KVA@0h
+    // CWN992  SB  Muzdalifah  SEC=60A  backupGen=30KVA@0h
     {
       id: "CWN992", name: "Muzdalifah — CWN992", location: "Muzdalifah",
       lat: 21.389249, lng: 39.906895,
       siteType: "outdoor_cabinet", powerConfig: "commercial_with_backup",
-      generatorKva: 30, generatorAge: 0,  // 60A × 0.5
+      generatorKva: 30, generatorAge: 0,          // SEC 60A × 0.5
       backupGeneratorKva: 30, backupGeneratorAge: 0,
       rectifierCapacityKw: 15,
       ac1CapacityBtu: 10200, ac1Age: 0,
-      batteryCapacityAh: 760,  // 190Ah × 4 strings
+      batteryCapacityAh: 760,                     // 190Ah × 4 strings
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 220,
+      telecomPowerKw: 10.56,
+      telecomHeatKw:  10.56,
     },
 
-    // CWN205  SG  Outdoor  Muzdalifah  gen=30KVA@3492h≈0yr  telecom=0
+    // CWN205  SG  Muzdalifah  gen=30KVA@3492h≈0yr  telecom=0
     {
       id: "CWN205", name: "Muzdalifah — CWN205", location: "Muzdalifah",
       lat: 21.396241, lng: 39.914628,
@@ -457,10 +489,11 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 10200, ac1Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 0,
+      telecomPowerKw: 0,
+      telecomHeatKw:  0,
     },
 
-    // CWN960  SB  Outdoor  Arafat  SEC=100A  backupGen=45KVA@918h≈0yr  AC1+AC2
+    // CWN960  SB  Arafat  SEC=100A  backupGen=45KVA@918h≈0yr  AC1+AC2
     {
       id: "CWN960", name: "Arafat — CWN960", location: "Arafat",
       lat: 21.347135, lng: 39.992573,
@@ -472,10 +505,11 @@ export function buildRealSites(): SiteConfig[] {
       ac2CapacityBtu: 10200, ac2Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 220,
+      telecomPowerKw: 10.56,
+      telecomHeatKw:  10.56,
     },
 
-    // CWN984  SG  Outdoor  Arafat  gen=30KVA@9331h≈1yr  AC1+AC2
+    // CWN984  SG  Arafat  gen=30KVA@9331h≈1yr  AC1+AC2
     {
       id: "CWN984", name: "Arafat — CWN984", location: "Arafat",
       lat: 21.348754, lng: 39.995701,
@@ -486,10 +520,11 @@ export function buildRealSites(): SiteConfig[] {
       ac2CapacityBtu: 10200, ac2Age: 0,
       batteryCapacityAh: 760,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 220,
+      telecomPowerKw: 10.56,
+      telecomHeatKw:  10.56,
     },
 
-    // CWN996  SG  Outdoor  Arafat  gen=30KVA@19356h≈2yr  telecom=0
+    // CWN996  SG  Arafat  gen=30KVA@19356h≈2yr  telecom=0
     {
       id: "CWN996", name: "Arafat — CWN996", location: "Arafat",
       lat: 21.374231, lng: 39.980616,
@@ -499,10 +534,11 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 10200, ac1Age: 0,
       batteryCapacityAh: 760,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 0,
+      telecomPowerKw: 0,
+      telecomHeatKw:  0,
     },
 
-    // CWN906  SB  Outdoor  Arafat  SEC=100A  backupGen=30KVA@0h
+    // CWN906  SB  Arafat  SEC=100A  backupGen=30KVA@0h
     {
       id: "CWN906", name: "Arafat — CWN906", location: "Arafat",
       lat: 21.37625, lng: 39.98233,
@@ -513,10 +549,11 @@ export function buildRealSites(): SiteConfig[] {
       ac1CapacityBtu: 10200, ac1Age: 0,
       batteryCapacityAh: 760,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 275,    // 13.2KW
+      telecomPowerKw: 13.2,
+      telecomHeatKw:  13.2,
     },
 
-    // CWN214  SB  Outdoor  Muzdalifah  SEC=100A  backupGen=35KVA@5091h≈0yr  AC1+AC2
+    // CWN214  SB  Muzdalifah  SEC=100A  backupGen=35KVA@5091h≈0yr  AC1+AC2
     {
       id: "CWN214", name: "Muzdalifah — CWN214", location: "Muzdalifah",
       lat: 21.39194, lng: 39.903738,
@@ -528,10 +565,11 @@ export function buildRealSites(): SiteConfig[] {
       ac2CapacityBtu: 10200, ac2Age: 0,
       batteryCapacityAh: 760,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 312,    // 14.96KW
+      telecomPowerKw: 14.98,
+      telecomHeatKw:  14.98,
     },
 
-    // CWN903  SB  Outdoor  Arafat  SEC=100A  backupGen=45KVA@8833h≈1yr  AC1+AC2
+    // CWN903  SB  Arafat  SEC=100A  backupGen=45KVA@8833h≈1yr  AC1+AC2
     {
       id: "CWN903", name: "Arafat — CWN903", location: "Arafat",
       lat: 21.359944, lng: 39.947977,
@@ -543,7 +581,8 @@ export function buildRealSites(): SiteConfig[] {
       ac2CapacityBtu: 10200, ac2Age: 0,
       batteryCapacityAh: 800,
       batteryType: "lead_acid", batteryAge: 0,
-      telecomLoadAmps: 275,
+      telecomPowerKw: 13.2,
+      telecomHeatKw:  13.2,
     },
   ];
 }

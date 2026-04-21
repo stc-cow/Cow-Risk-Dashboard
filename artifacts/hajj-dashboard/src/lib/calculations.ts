@@ -1,3 +1,23 @@
+// ─── Constants ────────────────────────────────────────────────────────────────
+const POWER_FACTOR            = 0.8;
+const ALTERNATOR_EFFICIENCY   = 0.87;
+const GENERATOR_RISK_FACTOR   = 0.9;
+const ANNUAL_GEN_DEGRADATION  = 0.03;   // 3% per year
+const COOLING_ADJUSTMENT      = 0.83;   // T3 climate derating
+const COP                     = 3.5;    // AC coefficient of performance
+const BTU_PER_KW              = 3412;   // Btu/h per KW
+const ANNUAL_AC_DEGRADATION   = 0.015;  // 1.5% per year
+const BATTERY_CAPACITY_V      = 50;     // V — used for Wh/KWh capacity
+const BATTERY_OPERATING_V     = 48;     // V — used for current → power KW
+const LEAD_ACID_DOD           = 0.5;    // 50% depth of discharge
+const LITHIUM_DOD             = 0.85;
+const LEAD_ACID_DISCHARGE_C   = 0.5;    // C-rate for max useful-time calc
+const LITHIUM_DISCHARGE_C     = 0.8;
+const LEAD_ACID_ANNUAL_DEG    = 0.20;   // 20% capacity loss per year
+const LITHIUM_ANNUAL_DEG      = 0.10;
+const BATT_CHARGE_RATE        = 0.05;   // effective charging C-rate (0.5/10)
+
+// ─── Site Configuration ───────────────────────────────────────────────────────
 export interface SiteConfig {
   id: string;
   name: string;
@@ -5,52 +25,64 @@ export interface SiteConfig {
   lat: number;
   lng: number;
   siteType: "shelter" | "outdoor_cabinet";
+
+  // SB = SEC + Backup Generator (runs S1–S9)
+  // SG = Single Generator only   (runs S5–S9)
   powerConfig: "single_generator" | "commercial_with_backup";
   placeholderSafe?: boolean;
 
-  generatorKva: number;
-  generatorAge: number;
+  // Prime power source
+  generatorKva: number;    // KVA  (SB: SEC_Amps × 0.5, age=0; SG: gen KVA)
+  generatorAge: number;    // years
+
+  // Backup power (SB sites only)
   backupGeneratorKva?: number;
   backupGeneratorAge?: number;
 
-  telecomLoadAmps: number;
+  // Telecom loads
+  telecomPowerKw: number;  // Total telecom KW — used for ALL power margin formulas
+  telecomHeatKw: number;   // Indoor/cabinet KW — drives AC heat load
+                           //   Shelter sites : indoor equipment only
+                           //   Outdoor cabinet: = telecomPowerKw (all heat inside cabinet)
 
+  // Cooling
   ac1CapacityBtu: number;
   ac1Age: number;
   ac2CapacityBtu?: number;
   ac2Age?: number;
 
-  batteryCapacityAh: number;
+  // Batteries
+  batteryCapacityAh: number;    // total = Ah_per_string × strings
   batteryType: "lead_acid" | "lithium";
-  batteryAge: number;
+  batteryAge: number;           // years
 
+  // Rectifier
   rectifierCapacityKw: number;
 }
 
+// ─── Result Types ─────────────────────────────────────────────────────────────
 export interface ScenarioResult {
   scenarioId: number;
   scenarioName: string;
-  powerSource: "prime" | "backup" | "outage";
+  powerSource: "prime_sec" | "prime_gen" | "backup" | "outage";
   coolingConfig: "ac1_only" | "ac1_ac2" | "none";
-  batteryState: "fully_charged" | "charging" | "discharging";
+  batteryState: "normal" | "charging" | "discharging";
 
-  generatorNetPowerKw: number;
-  telecomLoadKw: number;
+  primePowerKw: number;
+  backupPowerKw: number;
+  rectifierNetKw: number;
+  telecomPowerKw: number;
   telecomHeatBtu: number;
-
-  ac1PowerKw: number;
-  ac2PowerKw: number;
-  totalCoolingCapacityBtu: number;
-
-  batteryChargingPowerKw: number;
-  totalSiteLoadKw: number;
+  ac1NetBtu: number;
+  ac1NetPowerKw: number;
+  ac2NetBtu: number;
+  ac2NetPowerKw: number;
+  batteryChargingKw: number;
+  batteryUsefulHours: number;
 
   powerMarginKw: number;
   rectifierMarginKw: number;
-  batteryMaxPowerKw: number;
-  batteryMarginKw: number;
   coolingMarginBtu: number;
-  batteryBackupTimeHours: number;
 
   powerRisk: "safe" | "warning" | "critical";
   rectifierRisk: "safe" | "warning" | "critical";
@@ -68,193 +100,194 @@ export interface SiteAnalysis {
   technicianNeeded: boolean;
 }
 
-const POWER_FACTOR = 0.8;
-const ALTERNATOR_EFFICIENCY = 0.87;
-const GENERATOR_RISK_FACTOR = 0.9;
-const ANNUAL_DEGRADATION = 0.03;
-const COOLING_ADJUSTMENT = 0.833;
-const COP = 3.5;
-const BTU_PER_KW = 3412;
-const ANNUAL_AC_DEGRADATION = 0.015;
-const BATTERY_VOLTAGE = 50;
-
+// ─── Helper Functions ─────────────────────────────────────────────────────────
 function calcGeneratorNetPower(kva: number, age: number): number {
-  return kva * POWER_FACTOR * ALTERNATOR_EFFICIENCY * GENERATOR_RISK_FACTOR * (1 - ANNUAL_DEGRADATION * age);
+  return kva * POWER_FACTOR * ALTERNATOR_EFFICIENCY * GENERATOR_RISK_FACTOR
+    * (1 - ANNUAL_GEN_DEGRADATION * age);
 }
 
-function calcTelecomLoadKw(amps: number): number {
-  return (amps * 48) / 1000;
-}
-
-function calcTelecomHeatBtu(loadKw: number): number {
-  return loadKw * BTU_PER_KW;
-}
-
-function calcNetCoolingCapacityBtu(capacityBtu: number, age: number): number {
+function calcAcNetBtu(capacityBtu: number, age: number): number {
   return capacityBtu * COOLING_ADJUSTMENT * (1 - ANNUAL_AC_DEGRADATION * age);
 }
 
-function calcAcPowerKw(netCoolingBtu: number): number {
-  return netCoolingBtu / BTU_PER_KW / COP;
+function calcAcPowerKw(netBtu: number): number {
+  return netBtu / BTU_PER_KW / COP;
 }
 
-function calcBatteryEnergyWh(capacityAh: number): number {
-  return BATTERY_VOLTAGE * capacityAh;
+function calcBatteryChargingKw(totalAh: number): number {
+  // Effective charge rate: LEAD_ACID_CHARGE_RATE (0.5) / 10 = 0.05
+  return BATT_CHARGE_RATE * totalAh * BATTERY_OPERATING_V / 1000;
 }
 
-function calcBatteryUsableCapacityWh(
-  capacityAh: number,
-  batteryType: "lead_acid" | "lithium",
+function calcBatteryUsefulHours(
+  totalAh: number,
+  type: "lead_acid" | "lithium",
   age: number
 ): number {
-  const energyWh = calcBatteryEnergyWh(capacityAh);
-  const dod = batteryType === "lead_acid" ? 0.5 : 0.85;
-  const annualDeg = batteryType === "lead_acid" ? 0.2 : 0.1;
-  const remaining = Math.max(0, 1 - annualDeg * age);
-  return energyWh * dod * remaining;
+  const dod      = type === "lead_acid" ? LEAD_ACID_DOD      : LITHIUM_DOD;
+  const cRate    = type === "lead_acid" ? LEAD_ACID_DISCHARGE_C : LITHIUM_DISCHARGE_C;
+  const annDeg   = type === "lead_acid" ? LEAD_ACID_ANNUAL_DEG  : LITHIUM_ANNUAL_DEG;
+  const ageFactor = Math.max(0, 1 - annDeg * age);
+  // base hours = DOD / discharge_cRate (= 1.0 for lead-acid, 1.0625 for lithium)
+  const baseHours = dod / cRate;
+  return baseHours * ageFactor;
 }
 
-function calcBatteryMaxPowerKw(capacityAh: number, batteryType: "lead_acid" | "lithium"): number {
-  const cRate = batteryType === "lead_acid" ? 0.85 : 1.0;
-  const maxCurrentA = cRate * capacityAh;
-  return (maxCurrentA * BATTERY_VOLTAGE) / 1000;
-}
-
-function calcBatteryChargingPowerKw(capacityAh: number, batteryType: "lead_acid" | "lithium"): number {
-  const chargeRate = batteryType === "lead_acid" ? 0.5 : 0.8;
-  return (chargeRate * capacityAh * BATTERY_VOLTAGE) / 1000;
-}
-
-function classifyRisk(margin: number, warningThreshold = 0, criticalMargin = 0): "safe" | "warning" | "critical" {
-  if (margin < criticalMargin) return "critical";
-  if (margin < warningThreshold) return "warning";
+function riskFromMargin(
+  margin: number,
+  criticalBelow: number,
+  warningBelow: number
+): "safe" | "warning" | "critical" {
+  if (margin < criticalBelow) return "critical";
+  if (margin < warningBelow) return "warning";
   return "safe";
 }
 
-function calcPowerMargin(
-  genPower: number,
-  telecomLoad: number,
-  ac1Power: number,
-  ac2Power: number,
-  batteryCharging: number,
-  coolingConfig: "ac1_only" | "ac1_ac2" | "none",
-  batteryState: "fully_charged" | "charging" | "discharging"
-): number {
-  let load = telecomLoad;
-  if (coolingConfig === "ac1_only") load += ac1Power;
-  else if (coolingConfig === "ac1_ac2") load += ac1Power + ac2Power;
-  if (batteryState === "charging") load += batteryCharging;
-  return genPower - load;
-}
-
+// ─── Scenario Engine ──────────────────────────────────────────────────────────
 export function analyzeScenarios(site: SiteConfig): ScenarioResult[] {
-  const telecomLoadKw = calcTelecomLoadKw(site.telecomLoadAmps);
-  const telecomHeatBtu = calcTelecomHeatBtu(telecomLoadKw);
+  if (site.placeholderSafe) return [];
 
-  const ac1NetBtu = calcNetCoolingCapacityBtu(site.ac1CapacityBtu, site.ac1Age);
-  const ac1PowerKw = calcAcPowerKw(ac1NetBtu);
-
-  const ac2NetBtu = site.ac2CapacityBtu ? calcNetCoolingCapacityBtu(site.ac2CapacityBtu, site.ac2Age ?? 0) : 0;
-  const ac2PowerKw = site.ac2CapacityBtu ? calcAcPowerKw(ac2NetBtu) : 0;
-
-  const batteryCharging = calcBatteryChargingPowerKw(site.batteryCapacityAh, site.batteryType);
-  const batteryMaxPower = calcBatteryMaxPowerKw(site.batteryCapacityAh, site.batteryType);
-  const batteryUsableWh = calcBatteryUsableCapacityWh(site.batteryCapacityAh, site.batteryType, site.batteryAge);
-  const batteryBackupHours = batteryUsableWh / (telecomLoadKw * 1000);
-
-  const primePower = calcGeneratorNetPower(site.generatorKva, site.generatorAge);
-  const backupPower = site.backupGeneratorKva
+  // Pre-computed per-site values
+  const primePowerKw  = calcGeneratorNetPower(site.generatorKva, site.generatorAge);
+  const backupPowerKw = site.backupGeneratorKva
     ? calcGeneratorNetPower(site.backupGeneratorKva, site.backupGeneratorAge ?? 0)
     : 0;
+  const rectNetKw     = site.rectifierCapacityKw;
 
-  const scenarios: Array<{
+  const ac1NetBtu    = calcAcNetBtu(site.ac1CapacityBtu, site.ac1Age);
+  const ac1NetPwKw   = calcAcPowerKw(ac1NetBtu);
+  const ac2NetBtu    = site.ac2CapacityBtu
+    ? calcAcNetBtu(site.ac2CapacityBtu, site.ac2Age ?? 0) : 0;
+  const ac2NetPwKw   = site.ac2CapacityBtu ? calcAcPowerKw(ac2NetBtu) : 0;
+
+  const battChgKw    = calcBatteryChargingKw(site.batteryCapacityAh);
+  const battHours    = calcBatteryUsefulHours(
+    site.batteryCapacityAh, site.batteryType, site.batteryAge
+  );
+
+  const telecomPwKw  = site.telecomPowerKw;
+  const telecomHeatBtu = site.telecomHeatKw * BTU_PER_KW;
+
+  const isSB = site.powerConfig === "commercial_with_backup";
+
+  // ── Scenario definitions ────────────────────────────────────────────────────
+  // SB: runs S1–S9  |  SG: runs S5–S9 only (S1–S4 omitted, no SEC)
+  type ScenarioDef = {
     id: number;
     name: string;
-    powerSource: "prime" | "backup" | "outage";
-    coolingConfig: "ac1_only" | "ac1_ac2" | "none";
-    batteryState: "fully_charged" | "charging" | "discharging";
-  }> = [
-    { id: 1, name: "Prime Power / AC1 / Fully Charged", powerSource: "prime", coolingConfig: "ac1_only", batteryState: "fully_charged" },
-    { id: 2, name: "Prime Power / AC1+AC2 / Fully Charged", powerSource: "prime", coolingConfig: "ac1_ac2", batteryState: "fully_charged" },
-    { id: 3, name: "Prime Power / AC1 / Charging", powerSource: "prime", coolingConfig: "ac1_only", batteryState: "charging" },
-    { id: 4, name: "Prime Power / AC1+AC2 / Charging", powerSource: "prime", coolingConfig: "ac1_ac2", batteryState: "charging" },
-    { id: 5, name: "Backup Gen / AC1 / Fully Charged", powerSource: "backup", coolingConfig: "ac1_only", batteryState: "fully_charged" },
-    { id: 6, name: "Backup Gen / AC1+AC2 / Fully Charged", powerSource: "backup", coolingConfig: "ac1_ac2", batteryState: "fully_charged" },
-    { id: 7, name: "Backup Gen / AC1 / Charging", powerSource: "backup", coolingConfig: "ac1_only", batteryState: "charging" },
-    { id: 8, name: "Backup Gen / AC1+AC2 / Charging", powerSource: "backup", coolingConfig: "ac1_ac2", batteryState: "charging" },
-    { id: 9, name: "Power Outage / Battery Discharge", powerSource: "outage", coolingConfig: "none", batteryState: "discharging" },
+    pwSrc: "prime_sec" | "prime_gen" | "backup" | "outage";
+    cooling: "ac1_only" | "ac1_ac2" | "none";
+    battery: "normal" | "charging" | "discharging";
+  };
+
+  const allDefs: ScenarioDef[] = [
+    { id: 1, name: "S1 — Prime SEC / AC1 / Normal",        pwSrc: "prime_sec",  cooling: "ac1_only", battery: "normal" },
+    { id: 2, name: "S2 — Prime SEC / AC1+AC2 / Normal",    pwSrc: "prime_sec",  cooling: "ac1_ac2",  battery: "normal" },
+    { id: 3, name: "S3 — Prime SEC / AC1 / Charging",      pwSrc: "prime_sec",  cooling: "ac1_ac2",  battery: "charging" },
+    { id: 4, name: "S4 — Prime SEC / AC1+AC2 / Charging",  pwSrc: "prime_sec",  cooling: "ac1_ac2",  battery: "charging" },
+    { id: 5, name: "S5 — Generator / AC1 / Normal",        pwSrc: isSB ? "backup" : "prime_gen", cooling: "ac1_only", battery: "normal" },
+    { id: 6, name: "S6 — Generator / AC1+AC2 / Normal",    pwSrc: isSB ? "backup" : "prime_gen", cooling: "ac1_ac2",  battery: "normal" },
+    { id: 7, name: "S7 — Generator / AC1 / Charging",      pwSrc: isSB ? "backup" : "prime_gen", cooling: "ac1_ac2",  battery: "charging" },
+    { id: 8, name: "S8 — Generator / AC1+AC2 / Charging",  pwSrc: isSB ? "backup" : "prime_gen", cooling: "ac1_ac2",  battery: "charging" },
+    { id: 9, name: "S9 — Power Outage / Battery Discharge", pwSrc: "outage",     cooling: "none",     battery: "discharging" },
   ];
 
-  return scenarios.map((s) => {
-    const genPower = s.powerSource === "prime" ? primePower : s.powerSource === "backup" ? backupPower : 0;
+  const activeDefs = isSB ? allDefs : allDefs.filter(d => d.id >= 5);
 
-    const totalCoolingBtu =
-      s.coolingConfig === "ac1_only" ? ac1NetBtu :
-      s.coolingConfig === "ac1_ac2" ? ac1NetBtu + ac2NetBtu : 0;
+  return activeDefs.map((s): ScenarioResult => {
+    // Determine available generator power for this scenario
+    const genKw =
+      s.pwSrc === "prime_sec" ? primePowerKw :
+      s.pwSrc === "prime_gen" ? primePowerKw :
+      s.pwSrc === "backup"    ? backupPowerKw :
+      0; // outage
 
-    const acLoad = s.coolingConfig === "ac1_only" ? ac1PowerKw : s.coolingConfig === "ac1_ac2" ? ac1PowerKw + ac2PowerKw : 0;
-    const chargeLoad = s.batteryState === "charging" ? batteryCharging : 0;
-    const totalLoad = telecomLoadKw + acLoad + chargeLoad;
+    const isCharging = s.battery === "charging";
+    const isOutage   = s.pwSrc === "outage";
 
-    let powerMargin = 0;
-    let rectifierMargin = 0;
-    let batteryMarginKw = 0;
-    let coolingMarginBtu = 0;
-
-    if (s.powerSource === "outage") {
-      powerMargin = -totalLoad;
-      rectifierMargin = site.rectifierCapacityKw - telecomLoadKw;
-      batteryMarginKw = batteryMaxPower - telecomLoadKw;
-      coolingMarginBtu = -telecomHeatBtu;
+    // ── a) Power Supply Margin ──────────────────────────────────────────────
+    // Formula: genKw − AC_power_loads − telecomPwKw [− battChgKw if charging]
+    let powerMargin: number;
+    if (isOutage) {
+      powerMargin = 0 - telecomPwKw;
+    } else if (s.id === 1) {
+      // S1: Prime − AC1 − Telecom
+      powerMargin = genKw - ac1NetPwKw - telecomPwKw;
+    } else if (s.id === 2) {
+      // S2: Prime − AC1 − AC2 − Telecom
+      powerMargin = genKw - ac1NetPwKw - ac2NetPwKw - telecomPwKw;
+    } else if (s.id === 3 || s.id === 7) {
+      // S3/S7: Gen − AC1 − Telecom − BattCharging  (AC2 not in power formula)
+      powerMargin = genKw - ac1NetPwKw - telecomPwKw - battChgKw;
     } else {
-      powerMargin = genPower - totalLoad;
-      rectifierMargin = site.rectifierCapacityKw - telecomLoadKw - chargeLoad;
-      batteryMarginKw = batteryMaxPower - telecomLoadKw;
-      coolingMarginBtu = totalCoolingBtu - telecomHeatBtu;
+      // S4/S6/S8: Gen − AC1 − AC2 − Telecom [− BattCharging]
+      powerMargin = genKw - ac1NetPwKw - ac2NetPwKw - telecomPwKw;
+      if (isCharging) powerMargin -= battChgKw;
     }
 
-    const powerRisk: "safe" | "warning" | "critical" =
-      s.powerSource === "outage" ? "critical" :
-      powerMargin < 0 ? "critical" :
-      powerMargin < 3 ? "warning" : "safe";
+    // S5 (AC1 only, no charging) — override for cleanliness
+    if (s.id === 5) {
+      powerMargin = genKw - ac1NetPwKw - telecomPwKw;
+    }
 
-    const rectifierRisk: "safe" | "warning" | "critical" =
-      rectifierMargin < 0 ? "critical" :
-      rectifierMargin < 2 ? "warning" : "safe";
+    // ── b) Rectifier Supply Margin ──────────────────────────────────────────
+    // Formula: RectNet − Telecom [− BattCharging if charging] (outage = 0 − Telecom)
+    const rectifierMargin = isOutage
+      ? 0 - telecomPwKw
+      : rectNetKw - telecomPwKw - (isCharging ? battChgKw : 0);
 
+    // ── c) Battery Risk ─────────────────────────────────────────────────────
+    // S1–S8: SAFE (rectifier supplying)
+    // S9: batteryUsefulHours < 1 → RISK, ≥ 1 → SAFE
     const batteryRisk: "safe" | "warning" | "critical" =
-      s.powerSource === "outage"
-        ? (batteryMarginKw < 0 ? "critical" : batteryBackupHours < 2 ? "warning" : "safe")
-        : (batteryBackupHours < 2 ? "warning" : "safe");
+      isOutage ? (battHours < 1 ? "critical" : "safe") : "safe";
 
+    // ── d) Cooling Margin ───────────────────────────────────────────────────
+    // Outage: no cooling → 0 − shelterHeat
+    // AC1 only (S1/S5): AC1Btu − shelterHeat
+    // AC1+AC2 (all others): (AC1 + AC2)Btu − shelterHeat
+    let coolingMargin: number;
+    if (isOutage) {
+      coolingMargin = 0 - telecomHeatBtu;
+    } else if (s.cooling === "ac1_only") {
+      coolingMargin = ac1NetBtu - telecomHeatBtu;
+    } else {
+      coolingMargin = (ac1NetBtu + ac2NetBtu) - telecomHeatBtu;
+    }
+
+    // ── Risk Classification ─────────────────────────────────────────────────
+    const powerRisk: "safe" | "warning" | "critical" =
+      isOutage ? "critical" : riskFromMargin(powerMargin, 0, 3);
+    const rectifierRisk: "safe" | "warning" | "critical" =
+      isOutage ? "critical" : riskFromMargin(rectifierMargin, 0, 2);
     const coolingRisk: "safe" | "warning" | "critical" =
-      s.coolingConfig === "none" ? "critical" :
-      coolingMarginBtu < 0 ? "critical" :
-      coolingMarginBtu < 2000 ? "warning" : "safe";
+      isOutage ? "critical" : riskFromMargin(coolingMargin, 0, 5000);
 
     const riskMap = { safe: 0, warning: 1, critical: 2 };
-    const riskScore = riskMap[powerRisk] + riskMap[rectifierRisk] + riskMap[batteryRisk] + riskMap[coolingRisk];
+    const riskScore =
+      riskMap[powerRisk] + riskMap[rectifierRisk] +
+      riskMap[batteryRisk] + riskMap[coolingRisk];
 
     return {
-      scenarioId: s.id,
-      scenarioName: s.name,
-      powerSource: s.powerSource,
-      coolingConfig: s.coolingConfig,
-      batteryState: s.batteryState,
-      generatorNetPowerKw: genPower,
-      telecomLoadKw,
+      scenarioId:       s.id,
+      scenarioName:     s.name,
+      powerSource:      s.pwSrc,
+      coolingConfig:    s.cooling,
+      batteryState:     s.battery,
+      primePowerKw,
+      backupPowerKw,
+      rectifierNetKw:   rectNetKw,
+      telecomPowerKw:   telecomPwKw,
       telecomHeatBtu,
-      ac1PowerKw,
-      ac2PowerKw,
-      totalCoolingCapacityBtu: totalCoolingBtu,
-      batteryChargingPowerKw: batteryCharging,
-      totalSiteLoadKw: totalLoad,
-      powerMarginKw: powerMargin,
+      ac1NetBtu,
+      ac1NetPowerKw:    ac1NetPwKw,
+      ac2NetBtu,
+      ac2NetPowerKw:    ac2NetPwKw,
+      batteryChargingKw: battChgKw,
+      batteryUsefulHours: battHours,
+      powerMarginKw:    powerMargin,
       rectifierMarginKw: rectifierMargin,
-      batteryMaxPowerKw: batteryMaxPower,
-      batteryMarginKw,
-      coolingMarginBtu,
-      batteryBackupTimeHours: batteryBackupHours,
+      coolingMarginBtu: coolingMargin,
       powerRisk,
       rectifierRisk,
       batteryRisk,
@@ -264,39 +297,38 @@ export function analyzeScenarios(site: SiteConfig): ScenarioResult[] {
   });
 }
 
+// ─── Site-level Analysis ──────────────────────────────────────────────────────
 export function analyzeSite(site: SiteConfig): SiteAnalysis {
-  const scenarios = analyzeScenarios(site);
-
   if (site.placeholderSafe) {
     return {
       site,
-      scenarios,
+      scenarios: [],
       overallRisk: "safe",
       worstRiskScore: 0,
       technicianNeeded: false,
     };
   }
-  const worstRiskScore = Math.max(...scenarios.map((s) => s.riskScore));
 
-  const normalScenarios = scenarios.filter((s) => s.powerSource !== "outage");
-  const normalMaxRisk = Math.max(...normalScenarios.map((s) => s.riskScore));
+  const scenarios = analyzeScenarios(site);
 
-  const hasCriticalNormal = normalScenarios.some(
-    (s) => s.powerRisk === "critical" || s.coolingRisk === "critical" || s.rectifierRisk === "critical"
+  // Overall risk based on non-outage scenarios (S1–S8)
+  const operationalScenarios = scenarios.filter(s => s.powerSource !== "outage");
+  const hasCritical = operationalScenarios.some(
+    s => s.powerRisk === "critical" || s.rectifierRisk === "critical" || s.coolingRisk === "critical"
   );
-  const hasWarningNormal = normalScenarios.some(
-    (s) => s.powerRisk === "warning" || s.coolingRisk === "warning" || s.batteryRisk === "warning" || s.rectifierRisk === "warning"
+  const hasWarning = operationalScenarios.some(
+    s => s.powerRisk === "warning" || s.rectifierRisk === "warning" ||
+         s.batteryRisk === "warning" || s.coolingRisk === "warning"
   );
 
-  const batteryBackupHours = scenarios[8].batteryBackupTimeHours;
-  const batteryRiskFail = batteryBackupHours < 1;
+  const s9 = scenarios.find(s => s.scenarioId === 9);
+  const batteryInsufficient = s9 ? s9.batteryRisk === "critical" : false;
 
   const overallRisk: "safe" | "warning" | "critical" =
-    hasCriticalNormal || batteryRiskFail
-      ? "critical"
-      : hasWarningNormal || batteryBackupHours < 3
-      ? "warning"
-      : "safe";
+    hasCritical || batteryInsufficient ? "critical" :
+    hasWarning ? "warning" : "safe";
+
+  const worstRiskScore = Math.max(...scenarios.map(s => s.riskScore));
 
   return {
     site,

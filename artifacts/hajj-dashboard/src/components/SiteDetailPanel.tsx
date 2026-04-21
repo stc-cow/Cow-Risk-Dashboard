@@ -36,7 +36,8 @@ export function SiteDetailPanel({ analysis, onClose }: SiteDetailPanelProps) {
         <div><span className="text-muted-foreground">AC1:</span> <span className="font-semibold">{(site.ac1CapacityBtu / 1000).toFixed(0)}k BTU/h</span></div>
         <div><span className="text-muted-foreground">AC2:</span> <span className="font-semibold">{site.ac2CapacityBtu ? `${(site.ac2CapacityBtu / 1000).toFixed(0)}k BTU/h` : "—"}</span></div>
         <div><span className="text-muted-foreground">Rectifier:</span> <span className="font-semibold">{site.rectifierCapacityKw} kW</span></div>
-        <div><span className="text-muted-foreground">Telecom Load:</span> <span className="font-semibold">{site.telecomLoadAmps} A</span></div>
+        <div><span className="text-muted-foreground">Telecom Load:</span> <span className="font-semibold">{site.telecomPowerKw.toFixed(1)} KW</span></div>
+        <div><span className="text-muted-foreground">Shelter Heat Load:</span> <span className="font-semibold">{site.telecomHeatKw.toFixed(1)} KW</span></div>
       </div>
 
       <div className="px-4 py-2 border-b border-border">
@@ -102,7 +103,7 @@ export function SiteDetailPanel({ analysis, onClose }: SiteDetailPanelProps) {
               label="Power Margin"
               value={sc.powerMarginKw}
               unit="kW"
-              max={Math.max(sc.generatorNetPowerKw, 20)}
+              max={Math.max(sc.primePowerKw || sc.backupPowerKw || 20, 20)}
               risk={sc.powerRisk}
             />
             <MarginBar
@@ -113,10 +114,10 @@ export function SiteDetailPanel({ analysis, onClose }: SiteDetailPanelProps) {
               risk={sc.rectifierRisk}
             />
             <MarginBar
-              label="Battery Margin"
-              value={sc.batteryMarginKw}
-              unit="kW"
-              max={sc.batteryMaxPowerKw * 2}
+              label="Battery Useful Time"
+              value={sc.batteryUsefulHours}
+              unit="hrs"
+              max={3}
               risk={sc.batteryRisk}
             />
             <MarginBar
@@ -132,44 +133,50 @@ export function SiteDetailPanel({ analysis, onClose }: SiteDetailPanelProps) {
         <div className="border-t border-border pt-3">
           <div className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Engineering Parameters</div>
           <div className="grid grid-cols-1 gap-1 text-xs">
-            <div className="flex justify-between py-0.5">
-              <span className="text-muted-foreground">Generator Net Power</span>
-              <span className="font-semibold">{formatNum(sc.generatorNetPowerKw)} kW</span>
-            </div>
-            <div className="flex justify-between py-0.5">
-              <span className="text-muted-foreground">Telecom Load</span>
-              <span className="font-semibold">{formatNum(sc.telecomLoadKw)} kW</span>
-            </div>
-            <div className="flex justify-between py-0.5">
-              <span className="text-muted-foreground">Telecom Heat</span>
-              <span className="font-semibold">{formatNum(sc.telecomHeatBtu / 1000, 1)} kBTU/h</span>
-            </div>
-            <div className="flex justify-between py-0.5">
-              <span className="text-muted-foreground">AC1 Power Consumption</span>
-              <span className="font-semibold">{formatNum(sc.ac1PowerKw)} kW</span>
-            </div>
-            {sc.ac2PowerKw > 0 && (
+            {sc.primePowerKw > 0 && (
               <div className="flex justify-between py-0.5">
-                <span className="text-muted-foreground">AC2 Power Consumption</span>
-                <span className="font-semibold">{formatNum(sc.ac2PowerKw)} kW</span>
+                <span className="text-muted-foreground">Prime Net Power</span>
+                <span className="font-semibold">{formatNum(sc.primePowerKw)} kW</span>
+              </div>
+            )}
+            {sc.backupPowerKw > 0 && (
+              <div className="flex justify-between py-0.5">
+                <span className="text-muted-foreground">Backup Gen Net Power</span>
+                <span className="font-semibold">{formatNum(sc.backupPowerKw)} kW</span>
               </div>
             )}
             <div className="flex justify-between py-0.5">
-              <span className="text-muted-foreground">Total Cooling Capacity</span>
-              <span className="font-semibold">{formatNum(sc.totalCoolingCapacityBtu / 1000, 1)} kBTU/h</span>
+              <span className="text-muted-foreground">Telecom Load (total)</span>
+              <span className="font-semibold">{formatNum(sc.telecomPowerKw)} kW</span>
             </div>
             <div className="flex justify-between py-0.5">
-              <span className="text-muted-foreground">Battery Backup Time</span>
-              <span className="font-semibold">{formatNum(sc.batteryBackupTimeHours)} hrs</span>
+              <span className="text-muted-foreground">Shelter Heat</span>
+              <span className="font-semibold">{formatNum(sc.telecomHeatBtu / 1000, 1)} kBTU/h</span>
             </div>
             <div className="flex justify-between py-0.5">
-              <span className="text-muted-foreground">Battery Max Power</span>
-              <span className="font-semibold">{formatNum(sc.batteryMaxPowerKw)} kW</span>
+              <span className="text-muted-foreground">AC1 Net Cooling</span>
+              <span className="font-semibold">{formatNum(sc.ac1NetBtu / 1000, 1)} kBTU/h ({formatNum(sc.ac1NetPowerKw)} kW)</span>
             </div>
-            <div className="flex justify-between py-0.5 font-semibold border-t border-border mt-1 pt-1">
-              <span className="text-muted-foreground">Total Site Load</span>
-              <span>{formatNum(sc.totalSiteLoadKw)} kW</span>
+            {sc.ac2NetBtu > 0 && (
+              <div className="flex justify-between py-0.5">
+                <span className="text-muted-foreground">AC2 Net Cooling</span>
+                <span className="font-semibold">{formatNum(sc.ac2NetBtu / 1000, 1)} kBTU/h ({formatNum(sc.ac2NetPowerKw)} kW)</span>
+              </div>
+            )}
+            <div className="flex justify-between py-0.5">
+              <span className="text-muted-foreground">Rectifier Net</span>
+              <span className="font-semibold">{formatNum(sc.rectifierNetKw)} kW</span>
             </div>
+            <div className="flex justify-between py-0.5">
+              <span className="text-muted-foreground">Battery Useful Time</span>
+              <span className="font-semibold">{formatNum(sc.batteryUsefulHours, 2)} hrs</span>
+            </div>
+            {sc.batteryChargingKw > 0 && (
+              <div className="flex justify-between py-0.5">
+                <span className="text-muted-foreground">Battery Charging</span>
+                <span className="font-semibold">{formatNum(sc.batteryChargingKw)} kW</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -23,8 +23,8 @@ export function SiteTable({ analyses, selectedSiteId, onSelectSite }: SiteTableP
   });
 
   const worst = (a: SiteAnalysis) => {
-    const s = a.scenarios.reduce((acc, cur) => cur.riskScore > acc.riskScore ? cur : acc);
-    return s;
+    if (!a.scenarios.length) return null;
+    return a.scenarios.reduce((acc, cur) => cur.riskScore > acc.riskScore ? cur : acc);
   };
 
   return (
@@ -94,7 +94,7 @@ export function SiteTable({ analyses, selectedSiteId, onSelectSite }: SiteTableP
                   <td className="px-3 py-2 text-muted-foreground truncate max-w-28">{a.site.location}</td>
                   <td className="px-3 py-2 capitalize">{a.site.siteType.replace("_", " ")}</td>
                   <td className="px-3 py-2">{a.site.generatorKva} kVA</td>
-                  <td className="px-3 py-2">{ws.batteryBackupTimeHours.toFixed(1)}h</td>
+                  <td className="px-3 py-2">{ws ? ws.batteryUsefulHours.toFixed(2) + "h" : "—"}</td>
                   <td className="px-3 py-2">
                     <div className="flex gap-0.5">
                       {Array.from({ length: 4 }).map((_, i) => (
