@@ -29,48 +29,51 @@ interface HeatmapLayerProps {
 
 function HeatmapLayer({ analyses }: HeatmapLayerProps) {
   const map = useMap();
-  const layerRef = useRef<L.Layer | null>(null);
+  const safeRef = useRef<L.Layer | null>(null);
+  const riskRef = useRef<L.Layer | null>(null);
 
   useEffect(() => {
-    if (layerRef.current) {
-      map.removeLayer(layerRef.current);
-    }
+    if (safeRef.current) { map.removeLayer(safeRef.current); safeRef.current = null; }
+    if (riskRef.current) { map.removeLayer(riskRef.current); riskRef.current = null; }
 
-    // Safe sites = high weight → green glow
-    // Risk sites = low weight  → red glow
-    const safeWeight = { safe: 1.0, risk: 0.08 };
+    const safePoints = analyses
+      .filter(a => a.overallRisk === "safe")
+      .map(a => [a.site.lat, a.site.lng, 1.0]) as [number, number, number][];
 
-    const points = analyses.map(a => [
-      a.site.lat,
-      a.site.lng,
-      safeWeight[a.overallRisk],
-    ]) as [number, number, number][];
+    const riskPoints = analyses
+      .filter(a => a.overallRisk === "risk")
+      .map(a => [a.site.lat, a.site.lng, 1.0]) as [number, number, number][];
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const heat = (L as any).heatLayer(points, {
-      radius: 60,
-      blur: 50,
-      maxZoom: 17,
-      minOpacity: 0.30,
-      max: 1.0,
+    const heatSafe = (L as any).heatLayer(safePoints, {
+      radius: 55, blur: 45, maxZoom: 17, minOpacity: 0.25, max: 1.0,
       gradient: {
-        0.0:  "rgba(232,23,93,0)",    // transparent red edge
-        0.12: "#E8175D",               // red — risk / sparse areas
-        0.40: "#FF8C00",               // amber transition
-        0.70: "#7BC800",               // yellow-green
-        0.88: "#00BFB3",               // STC teal
-        1.0:  "#00966E",               // deep green — dense safe clusters
+        0.0: "rgba(0,150,110,0)",
+        0.3: "#00BFB3",
+        0.7: "#00966E",
+        1.0: "#006644",
       },
     });
 
-    heat.addTo(map);
-    layerRef.current = heat;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const heatRisk = (L as any).heatLayer(riskPoints, {
+      radius: 55, blur: 45, maxZoom: 17, minOpacity: 0.40, max: 1.0,
+      gradient: {
+        0.0: "rgba(232,23,93,0)",
+        0.3: "#FF9AAD",
+        0.7: "#E8175D",
+        1.0: "#9B0033",
+      },
+    });
+
+    heatSafe.addTo(map);
+    heatRisk.addTo(map);
+    safeRef.current = heatSafe;
+    riskRef.current = heatRisk;
 
     return () => {
-      if (layerRef.current) {
-        map.removeLayer(layerRef.current);
-        layerRef.current = null;
-      }
+      if (safeRef.current) { map.removeLayer(safeRef.current); safeRef.current = null; }
+      if (riskRef.current) { map.removeLayer(riskRef.current); riskRef.current = null; }
     };
   }, [map, analyses]);
 
