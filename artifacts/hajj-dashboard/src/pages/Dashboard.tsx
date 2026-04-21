@@ -77,24 +77,27 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          <div className="flex gap-1 mt-3">
-            {tabs.map(t => (
-              <button
-                key={t.key}
-                onClick={() => setActiveTab(t.key)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-t-lg transition-colors flex items-center gap-1.5 ${
-                  activeTab === t.key
-                    ? "bg-background text-foreground"
-                    : "text-purple-200 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                <span>{t.icon}</span>
-                <span>{t.label}</span>
-              </button>
-            ))}
-          </div>
         </div>
       </header>
+
+      <nav className="bg-card border-b border-border shadow-sm">
+        <div className="max-w-screen-2xl mx-auto px-4 flex gap-1">
+          {tabs.map(t => (
+            <button
+              key={t.key}
+              onClick={() => setActiveTab(t.key)}
+              className={`px-4 py-2.5 text-xs font-medium transition-colors flex items-center gap-1.5 border-b-2 -mb-px ${
+                activeTab === t.key
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+              }`}
+            >
+              <span>{t.icon}</span>
+              <span>{t.label}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
 
       <main className="flex-1 max-w-screen-2xl mx-auto w-full px-4 py-4">
         {activeTab === "overview" && (
