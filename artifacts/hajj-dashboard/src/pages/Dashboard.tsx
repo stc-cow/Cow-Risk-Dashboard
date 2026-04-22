@@ -1,7 +1,7 @@
 import { useState, useMemo, type ReactNode } from "react";
 import acesLogo from "@assets/ChatGPT_Image_Oct_14,_2025,_10_29_41_PM_1776566555155.png";
 import stcLogo from "@assets/7010.SR.D-9f4e531b_(1)_1776566577166.png";
-import { LayoutDashboard, FlaskConical, Map, ClipboardList, HardHat, Radio, CheckCircle2, AlertCircle, Users, Thermometer, Settings } from "lucide-react";
+import { LayoutDashboard, Map, ClipboardList, HardHat, Radio, CheckCircle2, AlertCircle, Users, Thermometer, Settings } from "lucide-react";
 import { analyzeSite } from "../lib/calculations";
 import { ALL_SITES } from "../lib/siteData";
 import { MetricCard } from "../components/MetricCard";
@@ -34,7 +34,7 @@ export default function Dashboard() {
 
   const tabs: Array<{ key: Tab; label: string; icon: ReactNode }> = [
     { key: "overview",     label: "Overview",   icon: <LayoutDashboard size={14} /> },
-    { key: "scenarios",    label: "Scenarios",  icon: <FlaskConical    size={14} /> },
+    { key: "scenarios",    label: "Scenarios",  icon: <span className="font-bold text-sm leading-none">!</span> },
     { key: "map",          label: "Heat Map",   icon: <Map             size={14} /> },
     { key: "sites",        label: "Site List",  icon: <ClipboardList   size={14} /> },
     { key: "technicians",  label: "Field Ops",  icon: <HardHat         size={14} /> },
