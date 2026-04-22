@@ -3,14 +3,17 @@ import type { SiteAnalysis } from "../lib/calculations";
 
 interface TechnicianRecommendationProps {
   analyses: SiteAnalysis[];
+  plannedTechs?: number;
+  totalFleet?: number;
 }
 
-export function TechnicianRecommendation({ analyses }: TechnicianRecommendationProps) {
+export function TechnicianRecommendation({ analyses, plannedTechs, totalFleet }: TechnicianRecommendationProps) {
   const risk = analyses.filter(a => a.overallRisk === "risk");
   const safe = analyses.filter(a => a.overallRisk === "safe");
 
   const techForRisk = Math.ceil(risk.length / 3);
-  const totalTech = techForRisk;
+  const totalTech = plannedTechs ?? techForRisk;
+  const fleetTotal = totalFleet ?? analyses.length;
 
   const byLocation: Record<string, { risk: number; safe: number }> = {};
   for (const a of analyses) {
@@ -39,10 +42,22 @@ export function TechnicianRecommendation({ analyses }: TechnicianRecommendationP
         </div>
         <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
           <div className="text-2xl font-bold text-blue-600">{totalTech}</div>
-          <div className="text-xs text-blue-700 font-medium mt-0.5">Total Techs</div>
-          <div className="text-[10px] text-blue-500 mt-1">{safe.length} sites remote</div>
+          <div className="text-xs text-blue-700 font-medium mt-0.5">
+            {plannedTechs ? "Planned Techs" : "Total Techs"}
+          </div>
+          <div className="text-[10px] text-blue-500 mt-1">
+            {plannedTechs ? `For ${fleetTotal} total sites` : `${safe.length} sites remote`}
+          </div>
         </div>
       </div>
+
+      {plannedTechs && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-[11px] text-amber-800">
+          <span className="font-semibold">Coverage: </span>
+          {analyses.length} of {fleetTotal} sites surveyed ·{" "}
+          {fleetTotal - analyses.length} pending · ~{(plannedTechs / fleetTotal).toFixed(2)} tech/site
+        </div>
+      )}
 
       <div>
         <div className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">By Location</div>

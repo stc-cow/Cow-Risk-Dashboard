@@ -20,10 +20,15 @@ export default function Dashboard() {
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
   const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(null);
 
+  const TOTAL_FLEET    = 94;   // full Hajj 1447 COW deployment
+  const PLANNED_TECHS  = 16;   // technicians allocated for operations
+
   const analyses = useMemo(() => ALL_SITES.map(analyzeSite), []);
 
-  const safeCount = analyses.filter(a => a.overallRisk === "safe").length;
-  const riskCount = analyses.filter(a => a.overallRisk === "risk").length;
+  const safeCount    = analyses.filter(a => a.overallRisk === "safe").length;
+  const riskCount    = analyses.filter(a => a.overallRisk === "risk").length;
+  const surveyedCount = analyses.length;
+  const pendingCount  = TOTAL_FLEET - surveyedCount;
 
   const selectedAnalysis = selectedSiteId ? analyses.find(a => a.site.id === selectedSiteId) ?? null : null;
 
@@ -31,8 +36,6 @@ export default function Dashboard() {
     setSelectedSiteId(prev => prev === id ? null : id);
     if (activeTab !== "map" && activeTab !== "sites") setActiveTab("map");
   };
-
-  const totalTechs = Math.ceil(riskCount / 3);
 
   const tabs: Array<{ key: Tab; label: string; icon: ReactNode }> = [
     { key: "overview",     label: "Overview",   icon: <LayoutDashboard size={14} /> },
@@ -64,6 +67,7 @@ export default function Dashboard() {
               <div className="w-px h-8 bg-white/30" />
               <div>
                 <h1 className="text-lg font-bold tracking-tight">Hajj 1447 COW Risk Dashboard</h1>
+                <p className="text-purple-200 text-[11px] leading-tight">{TOTAL_FLEET} sites · {surveyedCount} surveyed · {pendingCount} pending survey · {PLANNED_TECHS} techs planned</p>
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
@@ -106,10 +110,10 @@ export default function Dashboard() {
         {activeTab === "overview" && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-              <MetricCard title="Total COW Sites" value={analyses.length} icon={<Radio size={16} />} color="blue" subtitle="Hajj 1447 deployment" />
-              <MetricCard title="Safe Sites" value={safeCount} icon={<CheckCircle2 size={16} />} color="green" subtitle={`${((safeCount/analyses.length)*100).toFixed(0)}% of fleet`} />
-              <MetricCard title="Risk Sites" value={riskCount} icon={<AlertCircle size={16} />} color="red" subtitle="Requires attention" />
-              <MetricCard title="Field Technicians" value={totalTechs} icon={<Users size={16} />} color="blue" subtitle="Recommended deployment" />
+              <MetricCard title="Total COW Sites" value={TOTAL_FLEET} icon={<Radio size={16} />} color="blue" subtitle={`${surveyedCount} surveyed · ${pendingCount} pending`} />
+              <MetricCard title="Safe Sites" value={safeCount} icon={<CheckCircle2 size={16} />} color="green" subtitle={`Of ${surveyedCount} surveyed sites`} />
+              <MetricCard title="Risk Sites" value={riskCount} icon={<AlertCircle size={16} />} color="red" subtitle={`Of ${surveyedCount} surveyed sites`} />
+              <MetricCard title="Field Technicians" value={PLANNED_TECHS} icon={<Users size={16} />} color="blue" subtitle={`Planned · ${TOTAL_FLEET} total sites`} />
               <MetricCard title="Operating Temp" value="46°C" icon={<Thermometer size={16} />} color="red" subtitle="Extreme Hajj conditions" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -122,7 +126,7 @@ export default function Dashboard() {
               <div className="lg:col-span-2">
                 <SiteTable analyses={analyses} selectedSiteId={selectedSiteId} onSelectSite={handleSelectSite} />
               </div>
-              <TechnicianRecommendation analyses={analyses} />
+              <TechnicianRecommendation analyses={analyses} plannedTechs={PLANNED_TECHS} totalFleet={TOTAL_FLEET} />
             </div>
 
             <div className="bg-card border border-card-border rounded-xl p-4 text-xs space-y-3">
@@ -233,7 +237,7 @@ export default function Dashboard() {
         {activeTab === "technicians" && (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             <div className="xl:col-span-1">
-              <TechnicianRecommendation analyses={analyses} />
+              <TechnicianRecommendation analyses={analyses} plannedTechs={PLANNED_TECHS} totalFleet={TOTAL_FLEET} />
             </div>
             <div className="xl:col-span-2">
               <div className="bg-card border border-card-border rounded-xl p-4 shadow-sm">
