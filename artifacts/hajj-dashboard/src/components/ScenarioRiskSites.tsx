@@ -24,7 +24,6 @@ type RiskDim = "powerRisk" | "rectifierRisk" | "batteryRisk" | "coolingRisk";
 const DIMS: Array<{ key: RiskDim; label: string }> = [
   { key: "powerRisk",      label: "Power Supply" },
   { key: "rectifierRisk",  label: "Rectifier Supply" },
-  { key: "batteryRisk",    label: "Battery Supply" },
   { key: "coolingRisk",    label: "Cooling Supply" },
 ];
 
@@ -93,7 +92,6 @@ export function ScenarioRiskSites({ analyses, scenarioId, onClose }: Props) {
               ))}
               <th className="text-right px-4 py-2.5 font-bold text-gray-600 uppercase tracking-wide">Pwr Margin<br/>(kW)</th>
               <th className="text-right px-4 py-2.5 font-bold text-gray-600 uppercase tracking-wide">Rect Margin<br/>(kW)</th>
-              <th className="text-right px-4 py-2.5 font-bold text-gray-600 uppercase tracking-wide">Batt Hours</th>
               <th className="text-center px-3 py-2.5 font-bold text-gray-600 uppercase tracking-wide">Score</th>
             </tr>
           </thead>
@@ -127,9 +125,6 @@ export function ScenarioRiskSites({ analyses, scenarioId, onClose }: Props) {
                   </td>
                   <td className={`px-4 py-2.5 text-right font-mono font-semibold ${scenario.rectifierMarginKw < 0 ? "text-red-600" : "text-emerald-600"}`}>
                     {fmt(scenario.rectifierMarginKw)}
-                  </td>
-                  <td className={`px-4 py-2.5 text-right font-mono font-semibold ${scenario.batteryUsefulHours < 1 ? "text-red-600" : "text-gray-600"}`}>
-                    {scenario.batteryUsefulHours > 0 ? `${fmt(scenario.batteryUsefulHours)}h` : "—"}
                   </td>
                   <td className="px-3 py-2.5 text-center">
                     <span

@@ -72,7 +72,6 @@ export function SiteTable({ analyses, selectedSiteId, onSelectSite }: SiteTableP
               <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Location</th>
               <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Type</th>
               <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Power</th>
-              <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Battery (h)</th>
               <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Risk Score</th>
               <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Status</th>
             </tr>
@@ -97,7 +96,6 @@ export function SiteTable({ analyses, selectedSiteId, onSelectSite }: SiteTableP
                       ? `SEC ${a.site.secCapacityAmp ?? "—"}A / Gen ${a.site.backupGeneratorKva ?? "—"}kVA`
                       : `${a.site.generatorKva} kVA`}
                   </td>
-                  <td className="px-3 py-2">{ws ? ws.batteryUsefulHours.toFixed(2) + "h" : "—"}</td>
                   <td className="px-3 py-2">
                     <div className="flex gap-0.5">
                       {Array.from({ length: 4 }).map((_, i) => (
