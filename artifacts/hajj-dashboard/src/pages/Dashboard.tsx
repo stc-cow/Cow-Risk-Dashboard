@@ -11,6 +11,7 @@ import { SiteTable } from "../components/SiteTable";
 import { TechnicianRecommendation } from "../components/TechnicianRecommendation";
 import { RiskDistributionPie, RiskTypeBreakdown, LocationRiskChart } from "../components/RiskCharts";
 import { ScenarioMatrix } from "../components/ScenarioMatrix";
+import { ScenarioRiskSites } from "../components/ScenarioRiskSites";
 
 type Tab = "overview" | "scenarios" | "map" | "sites" | "technicians";
 
@@ -165,6 +166,7 @@ export default function Dashboard() {
         {activeTab === "scenarios" && (
           <div className="space-y-4">
             <ScenarioMatrix analyses={analyses} />
+            <ScenarioRiskSites analyses={analyses} />
           </div>
         )}
 
