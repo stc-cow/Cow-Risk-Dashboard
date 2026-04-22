@@ -18,6 +18,7 @@ type Tab = "overview" | "scenarios" | "map" | "sites" | "technicians";
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
+  const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(null);
 
   const analyses = useMemo(() => ALL_SITES.map(analyzeSite), []);
 
@@ -165,8 +166,18 @@ export default function Dashboard() {
 
         {activeTab === "scenarios" && (
           <div className="space-y-4">
-            <ScenarioMatrix analyses={analyses} />
-            <ScenarioRiskSites analyses={analyses} />
+            <ScenarioMatrix
+              analyses={analyses}
+              selectedScenarioId={selectedScenarioId}
+              onSelectScenario={id => setSelectedScenarioId(prev => prev === id ? null : id)}
+            />
+            {selectedScenarioId !== null && (
+              <ScenarioRiskSites
+                analyses={analyses}
+                scenarioId={selectedScenarioId}
+                onClose={() => setSelectedScenarioId(null)}
+              />
+            )}
           </div>
         )}
 

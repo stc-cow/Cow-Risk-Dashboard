@@ -36,12 +36,13 @@ function RiskDot({ level }: { level: RiskLevel }) {
 
 interface ScenarioMatrixProps {
   analyses: SiteAnalysis[];
+  selectedScenarioId: number | null;
+  onSelectScenario: (id: number) => void;
 }
 
-export function ScenarioMatrix({ analyses }: ScenarioMatrixProps) {
+export function ScenarioMatrix({ analyses, selectedScenarioId, onSelectScenario }: ScenarioMatrixProps) {
   const scenarioRows = Array.from({ length: 9 }, (_, i) => {
     const sId = i + 1;
-
     const scenarioResults = analyses.map(a => a.scenarios.find(s => s.scenarioId === sId)!).filter(Boolean);
 
     const powerRisks   = scenarioResults.map(s => s.powerRisk);
@@ -68,7 +69,9 @@ export function ScenarioMatrix({ analyses }: ScenarioMatrixProps) {
     <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
       <div className="px-5 py-4 border-b border-border" style={{ background: "linear-gradient(135deg, #4a0e8f 0%, #6b21c8 100%)" }}>
         <h2 className="text-white font-bold text-base">Operational Scenario Risk Matrix</h2>
-        <p className="text-purple-200 text-xs mt-0.5">9 test scenarios · 46°C extreme conditions · {analyses.length} sites evaluated</p>
+        <p className="text-purple-200 text-xs mt-0.5">
+          Click any row to drill into all site details · 9 scenarios · 46°C · {analyses.length} sites
+        </p>
       </div>
 
       <div className="overflow-x-auto">
@@ -77,44 +80,45 @@ export function ScenarioMatrix({ analyses }: ScenarioMatrixProps) {
             <tr className="border-b border-border" style={{ background: "#f5f0ff" }}>
               <th className="text-left px-4 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide w-12">Test<br/>Scenario</th>
               <th className="text-left px-4 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide">Scenario Description</th>
-              <th className="text-center px-3 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide">
-                Power<br/>Supply Risk
-              </th>
-              <th className="text-center px-3 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide">
-                Rectifier<br/>Supply Risk
-              </th>
-              <th className="text-center px-3 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide">
-                Batteries<br/>Supply Risk
-              </th>
-              <th className="text-center px-3 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide">
-                Cooling<br/>Supply Risk
-              </th>
-              <th className="text-center px-3 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide w-28">
-                Sites at<br/>Risk
-              </th>
+              <th className="text-center px-3 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide">Power<br/>Supply Risk</th>
+              <th className="text-center px-3 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide">Rectifier<br/>Supply Risk</th>
+              <th className="text-center px-3 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide">Batteries<br/>Supply Risk</th>
+              <th className="text-center px-3 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide">Cooling<br/>Supply Risk</th>
+              <th className="text-center px-3 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide w-28">Sites at<br/>Risk</th>
             </tr>
           </thead>
           <tbody>
             {scenarioRows.map((row, idx) => {
+              const isSelected = selectedScenarioId === row.sId;
               const isEven = idx % 2 === 0;
-              const rowBg = isEven ? "white" : "#fafafa";
+              const rowBg = isSelected
+                ? "#ede9fe"
+                : isEven ? "white" : "#fafafa";
 
               return (
-                <tr key={row.sId} className="border-b border-gray-100 hover:bg-purple-50/50 transition-colors" style={{ background: rowBg }}>
+                <tr
+                  key={row.sId}
+                  onClick={() => onSelectScenario(row.sId)}
+                  className="border-b border-gray-100 transition-colors cursor-pointer"
+                  style={{ background: rowBg }}
+                  onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = "#f3f0ff"; }}
+                  onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = rowBg; }}
+                >
                   <td className="px-4 py-4 text-center">
                     <span
                       className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white font-bold text-sm"
-                      style={{ background: "linear-gradient(135deg, #4a0e8f, #6b21c8)" }}
+                      style={{
+                        background: isSelected
+                          ? "linear-gradient(135deg,#7c3aed,#a855f7)"
+                          : "linear-gradient(135deg, #4a0e8f, #6b21c8)"
+                      }}
                     >
                       {row.sId}
                     </span>
                   </td>
                   <td className="px-4 py-4">
                     {SCENARIO_DESCRIPTIONS[row.sId].map((line, li) => (
-                      <div
-                        key={li}
-                        className={li === 0 ? "font-semibold text-gray-800 text-xs" : "text-gray-500 text-xs"}
-                      >
+                      <div key={li} className={li === 0 ? "font-semibold text-gray-800 text-xs" : "text-gray-500 text-xs"}>
                         {line}
                       </div>
                     ))}
@@ -131,9 +135,7 @@ export function ScenarioMatrix({ analyses }: ScenarioMatrixProps) {
                       >
                         {row.atRiskCount}
                       </span>
-                      <span className="text-[10px] text-gray-400">
-                        {row.atRiskCount === 1 ? "site" : "sites"}
-                      </span>
+                      <span className="text-[10px] text-gray-400">{row.atRiskCount === 1 ? "site" : "sites"}</span>
                     </div>
                   </td>
                 </tr>
